@@ -1,0 +1,79 @@
+<main id="support-view" class="view-section">
+      <div class="help-container">
+        <div class="section-header">
+          <span class="section-tag">Support Desk</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-desc">Find quick answers about procurement identity, verification, and submissions.</p>
+        </div>
+
+        <!-- FAQ Accordion List -->
+        <div class="faq-list">
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              <span>What is a Verifiable Credential (VC) in government tenders?</span>
+              <span class="faq-icon-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+              A Verifiable Credential is a digitally signed file containing tender awards and details. It complies with W3C standards, meaning anyone can instantly check its authenticity cryptographically using the public ledger registry without relying on database searches.
+            </div>
+          </div>
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              <span>How do I sign bids as a vendor?</span>
+              <span class="faq-icon-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+              Vendors sign their bid submissions during enrollment by linking their eSignet identity profile. This verifies that the company details submitted match the government-held corporate registry records.
+            </div>
+          </div>
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              <span>Are uploaded documents secure?</span>
+              <span class="faq-icon-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+              Yes, all documents uploaded to your profile are encrypted at rest and tied to your digital key registry. Only verified government reviewers and authorized automated agents can decrypt them for tender validation.
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-top: 4rem; margin-bottom: 2rem;">
+          <h2 class="section-title">Submit Support Ticket</h2>
+          <p class="section-desc">Need direct assistance? Open a ticket below and our auditors will review it.</p>
+        </div>
+
+        <div class="tender-form-card" style="margin-bottom: 3rem;">
+          <form id="support-ticket-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ticket-subject">Subject</label>
+                <input type="text" id="ticket-subject" placeholder="e.g. Identity verification timeout error" required>
+              </div>
+              <div class="form-group">
+                <label for="ticket-category">Topic</label>
+                <select id="ticket-category" style="width:100%; background:rgba(17, 24, 39, 0.4); border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; color:white; outline:none; font-family:var(--font-body);">
+                  <option value="technical" style="background:#030712;">Technical Support</option>
+                  <option value="billing" style="background:#030712;">Identity Verification Issues</option>
+                  <option value="tenders" style="background:#030712;">Tender Award Clarifications</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="ticket-message">Message Details</label>
+              <textarea id="ticket-message" placeholder="Provide step-by-step info about your issue..." required></textarea>
+            </div>
+            <div style="text-align: right;">
+              <button type="submit" class="btn btn-primary">Submit Ticket</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Support history table -->
+        <div class="ticket-history-card">
+          <h3 class="detail-section-title" style="border:none; margin:0;">Active Ticket History</h3>
+          <div class="ticket-history-list" id="support-tickets-history-list">
+            <!-- Dynamic elements go here -->
+          </div>
+        </div>
+      </div>
+    </main>

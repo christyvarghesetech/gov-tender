@@ -1,0 +1,370 @@
+<main id="dashboard-view" class="view-section">
+      <div class="dashboard-grid">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+          <div class="profile-card">
+            <div class="profile-avatar" id="official-avatar-initials">GO</div>
+            <div class="profile-info">
+              <h4 id="official-profile-name">Officer Jane Doe</h4>
+              <p id="official-profile-role">Ministry Reviewer</p>
+            </div>
+          </div>
+          <ul class="sidebar-menu">
+            <li><a class="sidebar-link active" data-dash-tab="dash-tab-overview">Dashboard Overview</a></li>
+            <li><a class="sidebar-link" data-dash-tab="dash-tab-list">Tender Management</a></li>
+            <li><a class="sidebar-link" data-dash-tab="dash-tab-applications">Bid Applications</a></li>
+            <li><a class="sidebar-link" data-dash-tab="dash-tab-create">Create Tender</a></li>
+            <li><a class="sidebar-link" data-dash-tab="dash-tab-users">User Management</a></li>
+            <li><a class="sidebar-link" data-dash-tab="dash-tab-settings">System Settings</a></li>
+            <li><a class="sidebar-link" id="dash-logout-btn" style="color: var(--accent-red); margin-top: 2rem;">Logout</a></li>
+          </ul>
+        </aside>
+
+        <!-- Dashboard Content Area -->
+        <div class="dashboard-content-area">
+          
+          <!-- SUB-TAB 17: Admin Dashboard Overview -->
+          <div id="dash-tab-overview" class="dash-tab-content" style="display: block;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Administrative Insights</h2>
+                <p>Overview of system usage, registrations, and cryptographic certifications.</p>
+              </div>
+            </div>
+
+            <!-- Extended Stats row -->
+            <div class="dash-stats-row">
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Total Registered Users</span>
+                <div class="dash-stat-val" id="stats-users-count">14</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">System Active Tenders</span>
+                <div class="dash-stat-val" style="color: var(--accent-cyan);" id="admin-stats-total">5</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Total Bid Submissions</span>
+                <div class="dash-stat-val" style="color: var(--accent-green);" id="stats-submissions-count">2</div>
+              </div>
+            </div>
+
+            <h3 class="detail-section-title" style="border:none; margin-top:2rem; margin-bottom:1rem;">Acquisitions Analytics Overview</h3>
+            <div class="tender-form-card" style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">Volume by Ministry (INR Crores)</span>
+              <!-- CSS simulated bar chart -->
+              <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.8rem;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Ministry of Public Works</span>
+                    <strong>$54.5M</strong>
+                  </div>
+                  <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                    <div style="width:65%; height:100%; background:var(--primary); border-radius:4px;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Ministry of Energy & Minerals</span>
+                    <strong>$82.0M</strong>
+                  </div>
+                  <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                    <div style="width:90%; height:100%; background:var(--accent-cyan); border-radius:4px;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Ministry of Technology & Comm</span>
+                    <strong>$18.5M</strong>
+                  </div>
+                  <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                    <div style="width:25%; height:100%; background:#7c3aed; border-radius:4px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ticket-history-card" style="margin-top: 2.5rem;">
+              <h3 class="detail-section-title" style="border:none; margin:0;">Platform System Log Logs</h3>
+              <div class="ticket-history-list" id="admin-audit-logs-list" style="font-family:monospace; font-size:0.75rem; color:var(--text-secondary);">
+                <!-- Dynamic rows -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- SUB-TAB 18: Admin Tender Listing -->
+          <div id="dash-tab-list" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Tender Catalog</h2>
+                <p>Track, approve, and cryptographically sign official tender listings.</p>
+              </div>
+            </div>
+
+            <!-- Stats Mini row -->
+            <div class="dash-stats-row">
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Total Tenders</span>
+                <div class="dash-stat-val" id="stats-total">5</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Pending Approval</span>
+                <div class="dash-stat-val" style="color: #f59e0b;" id="stats-pending">2</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Signed & Verified</span>
+                <div class="dash-stat-val" style="color: var(--accent-green);" id="stats-verified">3</div>
+              </div>
+            </div>
+
+            <!-- Tenders Table -->
+            <div class="tender-table-container">
+              <div class="table-header">
+                <h3>System Listing</h3>
+              </div>
+              <table class="tender-table">
+                <thead>
+                  <tr>
+                    <th>Tender ID</th>
+                    <th>Tender Name</th>
+                    <th>Ministry</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-tenders-tbody">
+                  <!-- JS generated rows go here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB-TAB: Bid Applications -->
+          <div id="dash-tab-applications" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Bid Applications</h2>
+                <p>Review and process vendor bid applications for active government tenders.</p>
+              </div>
+            </div>
+
+            <!-- Table of Applications -->
+            <div class="tender-table-container">
+              <div class="table-header">
+                <h3>Submitted Proposals</h3>
+              </div>
+              <table class="tender-table">
+                <thead>
+                  <tr>
+                    <th>Ref ID</th>
+                    <th>Tender</th>
+                    <th>Bidder</th>
+                    <th>Bid Value</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-applications-tbody">
+                  <!-- JS generated rows go here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 18: Create Tender Form -->
+          <div id="dash-tab-create" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Create Tender Entry</h2>
+                <p>Register a new government tender. Tenders require official digital sign-off to publish.</p>
+              </div>
+            </div>
+
+            <div class="tender-form-card">
+              <form id="create-tender-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="form-tender-name">Tender Name / Title</label>
+                    <input type="text" id="form-tender-name" placeholder="e.g. National Smart Grid Infrastructure Expansion" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="form-tender-ministry">Ministry</label>
+                    <input type="text" id="form-tender-ministry" value="Ministry of Infrastructure" required>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="form-tender-budget">Budget Allocation (INR ₹)</label>
+                    <input type="number" id="form-tender-budget" placeholder="e.g. 15000000" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="form-tender-date">Validity Until Date</label>
+                    <input type="date" id="form-tender-date" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="form-tender-desc">Tender Specifications & Scope</label>
+                  <textarea id="form-tender-desc" placeholder="Detail the requirements, deliverables, and conditions of this contract..." required></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline" id="form-cancel-btn">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Publish to Drafts</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 19: User Management Screen -->
+          <div id="dash-tab-users" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>User Management</h2>
+                <p>Suspend, activate, or audit registration profiles onboarding via eSignet.</p>
+              </div>
+            </div>
+
+            <div class="tender-table-container">
+              <table class="tender-table">
+                <thead>
+                  <tr>
+                    <th>Signee Name</th>
+                    <th>Email</th>
+                    <th>Company Name</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-users-tbody">
+                  <!-- Populated by app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 20: Settings Screen -->
+          <div id="dash-tab-settings" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Account Settings</h2>
+                <p>Configure security registries, eSignet endpoints, and profile details.</p>
+              </div>
+            </div>
+
+            <div class="tender-form-card">
+              <form id="admin-settings-form">
+                <h3 class="detail-section-title" style="border:none; margin-top:0;">Profile Settings</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="set-username">Reviewer Full Name</label>
+                    <input type="text" id="set-username" value="Officer Jane Doe" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="set-email">Work Email</label>
+                    <input type="email" id="set-email" value="jane.doe@infrastructure.gov" required>
+                  </div>
+                </div>
+
+                <h3 class="detail-section-title" style="border:none; margin-top:1.5rem;">Security & Password Management</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="set-old-pass">Current Password</label>
+                    <input type="password" id="set-old-pass" placeholder="••••••••">
+                  </div>
+                  <div class="form-group">
+                    <label for="set-new-pass">New Password</label>
+                    <input type="password" id="set-new-pass" placeholder="At least 8 chars">
+                  </div>
+                </div>
+
+                <h3 class="detail-section-title" style="border:none; margin-top:1.5rem;">System Configuration</h3>
+                <div class="form-group">
+                  <label style="display:flex; align-items:center; gap:0.5rem; text-transform:none; font-weight:normal;">
+                    <input type="checkbox" id="set-toggle-notifs" checked style="width:auto; margin:0;">
+                    <span>Enable real-time email notifications for bid submissions</span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label style="display:flex; align-items:center; gap:0.5rem; text-transform:none; font-weight:normal;">
+                    <input type="checkbox" id="set-toggle-double-verify" checked style="width:auto; margin:0;">
+                    <span>Require multi-sig hardware ledger validation for budget > $50M</span>
+                  </label>
+                </div>
+
+                <div class="form-actions" style="margin-top: 1.5rem; padding-top: 1rem;">
+                  <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           FACE AUTH MODAL
+      ═══════════════════════════════════════════════ -->
+      <div id="face-auth-modal" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
+        <div style="background:linear-gradient(145deg,#0d1f42,#1a3a6b); border:1px solid rgba(99,179,237,0.3); border-radius:20px; padding:2.5rem; width:min(420px,92vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,0.6); position:relative;">
+          <!-- Close -->
+          <button id="face-auth-close-btn" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:1rem;">✕</button>
+
+          <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(99,179,237,0.8);margin-bottom:0.5rem;">MOSIP Biometric Auth</div>
+          <h3 style="color:#fff;margin-bottom:0.25rem;font-size:1.2rem;">Face Authentication</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin-bottom:1.5rem;">Look at the camera. Hold still while scanning.</p>
+
+          <!-- Camera Preview -->
+          <div id="face-camera-wrap" style="position:relative;width:200px;height:200px;margin:0 auto 1.5rem;border-radius:50%;overflow:hidden;border:3px solid rgba(99,179,237,0.5);box-shadow:0 0 30px rgba(99,179,237,0.3);">
+            <video id="face-camera-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></video>
+            <!-- Scanning overlay -->
+            <div id="face-scan-line" style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(99,179,237,0.9),transparent);top:0;animation:scanLine 2s linear infinite;display:none;"></div>
+            <!-- Status overlay -->
+            <div id="face-status-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📷</div>
+          </div>
+
+          <!-- Confidence Meter -->
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;">
+              <span>Confidence Score</span>
+              <span id="face-confidence-label">0%</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:8px;height:8px;overflow:hidden;">
+              <div id="face-confidence-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#10b981);border-radius:8px;transition:width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <!-- Status Message -->
+          <div id="face-status-msg" style="font-size:0.82rem;color:rgba(255,255,255,0.65);margin-bottom:1.5rem;min-height:1.2rem;">Ready to scan. Click "Start Scan" to begin.</div>
+
+          <!-- Buttons -->
+          <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <button id="face-start-btn" class="btn btn-primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;">▶ Start Scan</button>
+            <button id="face-retry-btn" class="btn btn-outline" style="padding:0.6rem 1.2rem;font-size:0.85rem;display:none;">↺ Retry</button>
+          </div>
+          <div id="face-auth-spinner" style="display:none;margin-top:1rem;">
+            <div style="display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-top-color:#63b3ed;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+            <span style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-left:0.5rem;">Verifying with MOSIP IDA…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════
+           REVOKE CONFIRM MODAL
+      ═══════════════════════════════════════════════ -->
+      <div id="revoke-confirm-modal" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+        <div style="background:linear-gradient(145deg,#1a0a0a,#2d1010); border:1px solid rgba(239,68,68,0.4); border-radius:16px; padding:2rem; width:min(400px,92vw); text-align:center; box-shadow:0 20px 60px rgba(239,68,68,0.2);">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">⛔</div>
+          <h3 style="color:#fca5a5;margin-bottom:0.5rem;">Revoke Credential?</h3>
+          <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:0.5rem;">You are about to revoke the verifiable credential for:</p>
+          <div id="revoke-tender-label" style="color:#f87171;font-weight:700;font-size:0.9rem;margin-bottom:1.5rem;background:rgba(239,68,68,0.1);padding:0.5rem 1rem;border-radius:8px;"></div>
+          <p style="color:rgba(255,255,255,0.5);font-size:0.78rem;margin-bottom:1.75rem;">This action is <strong style="color:#fca5a5;">irreversible</strong>. The credential will be permanently marked as <strong style="color:#fca5a5;">REVOKED</strong> and will fail all future Inji Verify checks.</p>
+          <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <button id="revoke-cancel-btn" class="btn btn-outline" style="padding:0.6rem 1.25rem;font-size:0.85rem;border-radius:8px;">Cancel</button>
+            <button id="revoke-confirm-btn" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-size:0.85rem;font-weight:600;cursor:pointer;">⛔ Confirm Revoke</button>
+          </div>
+        </div>
+      </div>
+
+    </main>

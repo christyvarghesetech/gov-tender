@@ -1,0 +1,121 @@
+<main id="tender-details-view" class="view-section">
+      <div class="detail-layout">
+        <!-- Main details -->
+        <div class="detail-main-card">
+          <div class="detail-header">
+            <span class="tender-id-badge" id="det-id-badge">#GOV-2026-0000</span>
+            <h1 class="detail-title" id="det-title">Tender Title</h1>
+            <p style="color:var(--text-secondary); margin-top:0.5rem;" id="det-ministry">Ministry Details</p>
+          </div>
+
+          <div>
+            <h3 class="detail-section-title">Tender Overview</h3>
+            <p id="det-desc" style="color:var(--text-secondary); font-size:0.95rem; line-height:1.7;">
+              Detailed scope of project and description criteria...
+            </p>
+          </div>
+
+          <div>
+            <h3 class="detail-section-title">Eligibility Criteria</h3>
+            <ul class="detail-list" style="list-style-type:disc; padding-left:1.5rem; color:var(--text-secondary);">
+              <li>Must hold valid ISO certification relevant to field operations.</li>
+              <li>Must upload corporate tax registration credentials.</li>
+              <li>Company profile must not show suspension flags.</li>
+              <li>Required minimum annual turnover matching budget projections.</li>
+            </ul>
+          </div>
+
+          <!-- Verifiable Credential Info Section -->
+          <div id="det-credential-section" style="display:none; background: rgba(0,255,157,0.05); border: 1px solid rgba(0,255,157,0.15); border-radius: 12px; padding: 1.5rem; margin-top: 0.5rem;">
+            <h3 class="detail-section-title" style="color: var(--accent-green); border-color: rgba(0,255,157,0.2); margin-bottom: 1.25rem;">
+              ✅ Verifiable Credential
+            </h3>
+            <div class="detail-list" style="gap: 0.75rem;">
+              <div class="detail-list-item">
+                <span class="label" style="font-size:0.8rem;">Credential ID:</span>
+                <span class="val" id="det-credential-id" style="font-family: monospace; font-size: 0.82rem; color: var(--accent-green);">—</span>
+              </div>
+              <div class="detail-list-item">
+                <span class="label" style="font-size:0.8rem;">Issuer DID:</span>
+                <span class="val" id="det-issuer-did" style="font-family: monospace; font-size: 0.75rem; word-break:break-all; color: var(--text-secondary);">—</span>
+              </div>
+              <div class="detail-list-item">
+                <span class="label" style="font-size:0.8rem;">VC Status:</span>
+                <span class="verified-tag" style="font-size:0.75rem;">Verified</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="detail-section-title">Attached Documentation</h3>
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+              <div class="attachment-row">
+                <div class="attachment-info">
+                  <span>📄</span>
+                  <div>
+                    <strong style="display:block; color:white;">Tender_Specifications_Volume_1.pdf</strong>
+                    <span style="font-size:0.7rem; color:var(--text-muted);">PDF File &bull; 4.8 MB</span>
+                  </div>
+                </div>
+                <a onclick="alert('Downloading Document Specs...')" class="link-download">Download</a>
+              </div>
+              <div class="attachment-row">
+                <div class="attachment-info">
+                  <span>📄</span>
+                  <div>
+                    <strong style="display:block; color:white;">Cryptographic_Registry_Guidelines.pdf</strong>
+                    <span style="font-size:0.7rem; color:var(--text-muted);">PDF File &bull; 1.2 MB</span>
+                  </div>
+                </div>
+                <a onclick="alert('Downloading Guidelines...')" class="link-download">Download</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side actions / dates -->
+        <div class="detail-side-card">
+          <button class="btn btn-primary btn-full" id="detail-apply-btn" style="border-radius:10px;">Apply For Tender</button>
+          <button class="btn btn-outline btn-full" id="detail-save-btn" style="border-radius:10px;">
+            ⭐ Save Tender
+          </button>
+          <button class="btn btn-outline btn-full" id="detail-pdf-btn" style="border-radius:10px; color: var(--accent-green); border-color: rgba(0,255,157,0.3); display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+            📥 Download Tender PDF
+          </button>
+          
+          <!-- QR Code Display -->
+          <div id="det-qr-section" style="display:none; text-align:center; padding: 1rem 0; border-top: 1px solid var(--border-color); margin-top:0.5rem;">
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.75rem;">Scan to Verify</p>
+            <img id="det-qr-img" src="" alt="Verification QR Code" style="width:120px; height:120px; border-radius:8px; border:1px solid var(--border-color);">
+            <p style="font-size:0.7rem; color:var(--text-muted); margin-top:0.5rem;" id="det-qr-label">—</p>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-color); padding-top:1.5rem; margin-top:0.5rem;">
+            <h3 class="detail-section-title" style="font-size:1rem; border:none; padding:0; margin-bottom:1rem;">Important Dates</h3>
+            <div class="detail-list">
+              <div class="detail-list-item">
+                <span class="label">Date Published:</span>
+                <span class="val" id="det-published-date">10 Jun 2026</span>
+              </div>
+              <div class="detail-list-item">
+                <span class="label">Bidding Deadline:</span>
+                <span class="val" id="det-deadline-date">30 Aug 2026</span>
+              </div>
+              <div class="detail-list-item">
+                <span class="label">Expected Evaluation:</span>
+                <span class="val">15 Sep 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-color); padding-top:1.5rem;">
+            <h3 class="detail-section-title" style="font-size:1rem; border:none; padding:0; margin-bottom:1rem;">Acquisition Contact</h3>
+            <div class="detail-list" style="font-size:0.8rem; color:var(--text-secondary);">
+              <p><strong style="color:white;">Office of Procurement</strong></p>
+              <p>Email: acquisitions@gov.tender</p>
+              <p>Phone: +91 11 2306 2938</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>

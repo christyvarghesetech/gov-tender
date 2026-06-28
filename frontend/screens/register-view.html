@@ -1,0 +1,61 @@
+<main id="register-view" class="view-section">
+      <div class="login-card" style="max-width: 500px; margin: 2rem auto;">
+        <div class="login-header">
+          <div class="login-header-logo">GT</div>
+          <h2>Create Vendor Account</h2>
+          <p>Register as an authorized bidder on GovTender</p>
+        </div>
+
+        <form id="registration-form">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" placeholder="Enter your full legal name" required>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <div class="form-group">
+              <label for="reg-email">Email Address</label>
+              <input type="email" id="reg-email" placeholder="name@company.com" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-phone">Phone Number</label>
+              <input type="tel" id="reg-phone" placeholder="+91 98765 43210" required>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <div class="form-group">
+              <label for="reg-company">Company Name</label>
+              <input type="text" id="reg-company" placeholder="e.g. Acme Contracting Ltd" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-type">User Type</label>
+              <select id="reg-type" style="width:100%; background:rgba(17, 24, 39, 0.4); border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; color:white; outline:none; font-family:var(--font-body);" required>
+                <option value="Vendor" style="background:#030712;">Vendor</option>
+                <option value="Contractor" style="background:#030712;">Contractor</option>
+                <option value="Consultant" style="background:#030712;">Consultant</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <div class="form-group">
+              <label for="reg-pass">Password</label>
+              <input type="password" id="reg-pass" placeholder="At least 8 characters" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-confirm">Confirm Password</label>
+              <input type="password" id="reg-confirm" placeholder="Repeat password" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="display:flex; align-items:flex-start; gap:0.5rem; text-transform:none; font-weight:normal;">
+              <input type="checkbox" id="reg-agree" style="width:auto; margin-top:0.25rem;" required>
+              <span>I accept the <a href="#" style="color:var(--primary-hover);">Terms & Conditions</a> and consent to cryptographic ID validation.</span>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+        </form>
+
+        <div class="login-footer-info">
+          Already have an account? <a onclick="switchView('login-view')" style="cursor:pointer; font-weight:bold;">Login here</a>
+        </div>
+      </div>
+    </main>

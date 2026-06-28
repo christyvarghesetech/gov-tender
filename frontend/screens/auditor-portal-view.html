@@ -1,0 +1,191 @@
+<main id="auditor-portal-view" class="view-section">
+      <div class="dashboard-grid">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+          <div class="profile-card">
+            <div class="profile-avatar" id="auditor-avatar-initials">AU</div>
+            <div class="profile-info">
+              <h4 id="auditor-profile-name">Arthur Dent</h4>
+              <p>System Auditor</p>
+            </div>
+          </div>
+          <ul class="sidebar-menu">
+            <li><a class="sidebar-link active" data-auditor-tab="auditor-tab-dashboard">Dashboard Overview</a></li>
+            <li><a class="sidebar-link" data-auditor-tab="auditor-tab-verify">Verify Desk</a></li>
+            <li><a class="sidebar-link" data-auditor-tab="auditor-tab-logs">System Audit Logs</a></li>
+            <li><a class="sidebar-link" id="auditor-logout-btn" style="color: var(--accent-red); margin-top: 2rem;">Logout</a></li>
+          </ul>
+        </aside>
+
+        <!-- Dashboard Content Area -->
+        <div class="dashboard-content-area">
+          
+          <!-- TAB: Dashboard Overview -->
+          <div id="auditor-tab-dashboard" class="dash-tab-content" style="display: block;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Auditor Portal Overview</h2>
+                <p>Monitor credential integrity verification logs and system audit records.</p>
+              </div>
+            </div>
+
+            <div class="dash-stats-row">
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Total Verified Credentials</span>
+                <div class="dash-stat-val" id="auditor-stats-credentials">0</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Total Audit Log Entries</span>
+                <div class="dash-stat-val" style="color: var(--accent-cyan);" id="auditor-stats-logs">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: Verify Desk -->
+          <div id="auditor-tab-verify" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Verify Credentials</h2>
+                <p>Run real-time Inji Verify signature & integrity checks on government VCs.</p>
+              </div>
+            </div>
+
+            <!-- Search Input -->
+            <div class="tender-form-card" style="padding:1.75rem; margin-bottom:1.5rem;">
+              <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+                <div style="background:linear-gradient(135deg,#1a3a6b,#2563eb);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🔍</div>
+                <div>
+                  <h4 style="margin:0;font-size:0.95rem;">Cryptographic Verification Desk</h4>
+                  <p style="margin:0;font-size:0.75rem;color:var(--text-secondary);">Powered by Inji Verify · MOSIP Open Digital Stack</p>
+                </div>
+              </div>
+              <div style="display:flex; gap:0.5rem; max-width:100%;">
+                <input type="text" id="auditor-search-input" placeholder="Enter Credential ID (e.g. VC-8F2A-19CC-BEEF) or Tender No." style="flex:1;">
+                <button class="btn btn-primary" id="auditor-search-btn">▶ Verify</button>
+              </div>
+            </div>
+
+            <!-- Inji Verify Result Panel (hidden until search) -->
+            <div id="inji-verify-result-panel" style="display:none;">
+
+              <!-- Status Banner -->
+              <div id="inji-status-banner" style="border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;">
+                <div id="inji-status-icon" style="font-size:2.5rem;flex-shrink:0;"></div>
+                <div>
+                  <div id="inji-status-title" style="font-size:1.1rem;font-weight:700;"></div>
+                  <div id="inji-status-subtitle" style="font-size:0.8rem;opacity:0.75;"></div>
+                </div>
+                <div style="margin-left:auto;">
+                  <div id="inji-status-chip" style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.3rem 0.8rem;border-radius:20px;"></div>
+                </div>
+              </div>
+
+              <!-- Two-column detail grid -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
+                <!-- Inji Verify Card -->
+                <div class="tender-form-card" style="padding:1.25rem;">
+                  <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-cyan);margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🛡️</span> Inji Verify Checks
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.83rem;">
+                      <span style="color:var(--text-secondary);">Signature Valid</span>
+                      <span id="inji-sig-chip" style="font-weight:700;"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.83rem;">
+                      <span style="color:var(--text-secondary);">Issuer Valid</span>
+                      <span id="inji-issuer-chip" style="font-weight:700;"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.83rem;">
+                      <span style="color:var(--text-secondary);">Document Integrity</span>
+                      <span id="inji-integrity-chip" style="font-weight:700;"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.83rem;">
+                      <span style="color:var(--text-secondary);">Credential Status</span>
+                      <span id="inji-cred-status-chip" style="font-weight:700;"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tender Info Card -->
+                <div class="tender-form-card" style="padding:1.25rem;">
+                  <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#a78bfa;margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>📋</span> Tender Details
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.82rem;">
+                    <div><span style="color:var(--text-secondary);">Tender No: </span><strong id="inji-tender-no"></strong></div>
+                    <div><span style="color:var(--text-secondary);">Ministry: </span><span id="inji-ministry"></span></div>
+                    <div><span style="color:var(--text-secondary);">Budget: </span><span id="inji-budget"></span></div>
+                    <div><span style="color:var(--text-secondary);">Validity: </span><span id="inji-date"></span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DID & VC Identity -->
+              <div class="tender-form-card" style="padding:1.25rem;margin-bottom:1rem;">
+                <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:1rem;">🔑 Cryptographic Identity</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.8rem;">
+                  <div>
+                    <div style="color:var(--text-secondary);margin-bottom:0.2rem;font-size:0.72rem;">Credential ID</div>
+                    <div id="inji-cred-id" style="font-family:monospace;word-break:break-all;color:var(--accent-cyan);"></div>
+                  </div>
+                  <div>
+                    <div style="color:var(--text-secondary);margin-bottom:0.2rem;font-size:0.72rem;">VC ID (urn:uuid)</div>
+                    <div id="inji-vc-id" style="font-family:monospace;word-break:break-all;font-size:0.72rem;"></div>
+                  </div>
+                  <div>
+                    <div style="color:var(--text-secondary);margin-bottom:0.2rem;font-size:0.72rem;">Issuer DID</div>
+                    <div id="inji-issuer-did" style="font-family:monospace;word-break:break-all;color:#a78bfa;font-size:0.72rem;"></div>
+                  </div>
+                  <div>
+                    <div style="color:var(--text-secondary);margin-bottom:0.2rem;font-size:0.72rem;">VC Context</div>
+                    <div id="inji-context" style="font-family:monospace;font-size:0.7rem;word-break:break-all;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- QR Code + Actions -->
+              <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;">
+                <div class="tender-form-card" style="padding:1.25rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem;min-width:140px;">
+                  <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-secondary);">QR Code</div>
+                  <img id="inji-qr-img" src="" alt="QR" style="width:90px;height:90px;border-radius:8px;background:#fff;padding:4px;"/>
+                </div>
+                <div class="tender-form-card" style="padding:1.25rem;flex:1;">
+                  <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:0.75rem;">Actions</div>
+                  <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                    <button id="auditor-pdf-btn" class="btn btn-primary" style="font-size:0.8rem;padding:0.5rem 1rem;text-align:left;">📄 Download PDF Certificate</button>
+                    <button id="auditor-json-toggle-btn" class="btn btn-outline" style="font-size:0.8rem;padding:0.5rem 1rem;text-align:left;border-radius:8px;">{ } View Raw VC JSON</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Raw VC JSON Accordion -->
+              <div id="raw-vc-accordion" style="display:none;" class="tender-form-card">
+                <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:0.75rem;">Raw Verifiable Credential JSON</div>
+                <pre id="raw-vc-json" style="background:rgba(0,0,0,0.4);border-radius:8px;padding:1rem;font-size:0.72rem;overflow-x:auto;max-height:300px;overflow-y:auto;color:#a3e635;white-space:pre-wrap;word-break:break-all;"></pre>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- TAB: System Audit Logs -->
+          <div id="auditor-tab-logs" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>System Audit Logs</h2>
+                <p>Chronological sequence of all system transactions and administrative actions.</p>
+              </div>
+            </div>
+            
+            <div class="tender-form-card" style="padding:1rem;">
+              <div id="auditor-audit-logs-list" class="ticket-list" style="max-height:450px; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem;">
+                <!-- Filled dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>

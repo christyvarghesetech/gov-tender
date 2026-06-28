@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GovTender - Secure Government Tender Verification & Signing Platform</title>
+  <meta name="description" content="Digitally review, approve, cryptographically sign and instantly verify government tender documents using Digital ID and Verifiable Credentials.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- CSS Grid Background Pattern & Glowing Orbs -->
+  <div class="grid-overlay"></div>
+  <div class="glow-sphere glow-sphere-primary"></div>
+  <div class="glow-sphere glow-sphere-secondary"></div>
+  <div class="glow-sphere glow-sphere-tertiary"></div>
+
+  <div class="app-container">
+    <!-- --- HEADER / NAVIGATION --- -->
+    <header id="main-header">
+      <div class="nav-content">
+        <a class="logo" id="nav-logo-btn">
+          <div class="logo-icon">GT</div>
+          <div class="logo-text">
+            <span class="logo-title">GovTender</span>
+            <span class="logo-sub">Verification System</span>
+          </div>
+        </a>
+        <nav>
+          <ul>
+            <li><a class="nav-link active" data-view="home-view">Home</a></li>
+            <li><a class="nav-link" data-view="verify-view">Verify Tender</a></li>
+            <li><a class="nav-link" data-view="support-view">Help & Support</a></li>
+            <li id="nav-profile-links">
+              <button class="btn btn-login" id="header-login-btn">Login / Register</button>
+              <button class="btn btn-outline" id="header-dashboard-btn" style="display: none; padding: 0.5rem 1.25rem;">Dashboard</button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ================== 1. LANDING VIEW ================== -->
+        <!-- --- MAIN VIEWS CONTAINER --- -->
+    <div id="view-container"></div>
+
+
+
+    <!-- ================== 12. DIGITAL SIGNING MODAL OVERLAY ================== -->
+    <div class="signing-modal-overlay" id="signing-modal">
+      <div class="signing-modal-content">
+        <div class="signing-animation-container">
+          <div class="signing-ring"></div>
+          <svg class="signing-pen" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+          </svg>
+        </div>
+        <h3 class="signing-status-title" id="signing-title">Generating Credentials</h3>
+        <p class="signing-status-desc" id="signing-desc">Authorising signature using eSignet MOSIP keys...</p>
+        
+        <div class="modal-progress-bar">
+          <div class="modal-progress-fill" id="modal-progress-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================== 13. MOSIP IDA OTP VERIFICATION MODAL ================== -->
+    <div class="signing-modal-overlay" id="ida-otp-modal">
+      <div class="signing-modal-content" style="max-width: 400px; padding: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; text-align: center; background: rgba(3, 7, 18, 0.95); border: 1px solid var(--border-color); border-radius: 16px; backdrop-filter: blur(20px);">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔒</div>
+        <h3 class="signing-status-title" style="margin: 0; font-family: var(--font-display); font-size: 1.5rem; color: #fff;">MOSIP IDA Authentication</h3>
+        <p class="signing-status-desc" style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">Enter the 6-digit OTP code sent to your registered device to authorize the signature.</p>
+        
+        <div style="display: flex; gap: 0.5rem; justify-content: center;" id="ida-otp-container">
+          <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" style="width: 40px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: white;" required>
+          <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" style="width: 40px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: white;" required>
+          <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" style="width: 40px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: white;" required>
+          <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" style="width: 40px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: white;" required>
+          <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" style="width: 40px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: white;" required>
+          <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" style="width: 40px; height: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: white;" required>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button class="btn btn-outline" style="flex: 1;" id="ida-otp-cancel-btn">Cancel</button>
+          <button class="btn btn-primary" style="flex: 1;" id="ida-otp-verify-btn">Authorize</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================== FOOTER ================== -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a class="logo">
+            <div class="logo-icon">GT</div>
+            <div class="logo-text">
+              <span class="logo-title">GovTender</span>
+              <span class="logo-sub">Verification System</span>
+            </div>
+          </a>
+          <p>Secure. Transparent. Government-grade. Cryptographic verification of public acquisitions.</p>
+        </div>
+        <div class="footer-column">
+          <h4>Platform</h4>
+          <ul>
+            <li><a onclick="switchView('home-view')">Home</a></li>
+            <li><a onclick="switchView('verify-view')">Verify Tender</a></li>
+            <li><a onclick="switchView('support-view')">Help & Support</a></li>
+            <li><a onclick="switchView('login-view')">Login</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Data Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Support</h4>
+          <ul>
+            <li><a onclick="switchView('support-view')">FAQ Desk</a></li>
+            <li><a href="#">Security Audits</a></li>
+            <li><a href="#">Documentation</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 GovTender Verification System. All rights reserved.</span>
+        <span class="footer-powered">Built on MOSIP &bull; W3C VC &bull; eSignet</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ================== PDF PRINT CERTIFICATE AREA ================== -->
+  <div id="pdf-print-area"></div>
+
+  <!-- jsPDF for client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="app.js"></script>
+</body>
+</html>

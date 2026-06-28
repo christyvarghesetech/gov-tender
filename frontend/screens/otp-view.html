@@ -1,0 +1,33 @@
+<main id="otp-view" class="view-section">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-header-logo">🔑</div>
+          <h2>OTP Verification</h2>
+          <p>Confirm the code sent to your registered device</p>
+        </div>
+
+        <form id="registration-otp-form">
+          <div class="form-group">
+            <label>Enter 6-Digit Code</label>
+            <div class="otp-box-container" id="reg-otp-container">
+              <input type="text" class="otp-input form-group input" maxlength="1" pattern="[0-9]" required>
+              <input type="text" class="otp-input form-group input" maxlength="1" pattern="[0-9]" required>
+              <input type="text" class="otp-input form-group input" maxlength="1" pattern="[0-9]" required>
+              <input type="text" class="otp-input form-group input" maxlength="1" pattern="[0-9]" required>
+              <input type="text" class="otp-input form-group input" maxlength="1" pattern="[0-9]" required>
+              <input type="text" class="otp-input form-group input" maxlength="1" pattern="[0-9]" required>
+            </div>
+          </div>
+
+          <div style="text-align:center; font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+            Code expires in: <span id="otp-timer-count" style="color:var(--accent-cyan); font-weight:600;">02:00</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full">Verify OTP</button>
+
+          <div style="text-align:center; margin-top:1.5rem; font-size:0.8rem;">
+            Didn't receive a code? <a id="otp-resend-btn" style="color:var(--primary-hover); cursor:pointer; font-weight:600; text-decoration:none;">Resend OTP</a>
+          </div>
+        </form>
+      </div>
+    </main>

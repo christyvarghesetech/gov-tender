@@ -1,0 +1,273 @@
+<main id="vendor-portal-view" class="view-section">
+      <div class="dashboard-grid">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+          <div class="profile-card">
+            <div class="profile-avatar" id="vendor-avatar-initials">AC</div>
+            <div class="profile-info">
+              <h4 id="vendor-profile-name">Acme Contracting</h4>
+              <p id="vendor-profile-role">Registered Bidder</p>
+            </div>
+          </div>
+          <ul class="sidebar-menu">
+            <li><a class="sidebar-link active" data-vendor-tab="vendor-tab-dashboard">Dashboard Overview</a></li>
+            <li><a class="sidebar-link" data-vendor-tab="vendor-tab-browse">Browse Tenders</a></li>
+            <li><a class="sidebar-link" data-vendor-tab="vendor-tab-saved">Saved Tenders</a></li>
+            <li><a class="sidebar-link" data-vendor-tab="vendor-tab-applications">My Applications</a></li>
+            <li><a class="sidebar-link" data-vendor-tab="vendor-tab-documents">Document Manager</a></li>
+            <li><a class="sidebar-link" data-vendor-tab="vendor-tab-notifications">Notifications Inbox <span class="role-badge" id="badge-notif-count" style="margin-left:0.25rem;">0</span></a></li>
+            <li><a class="sidebar-link" data-vendor-tab="vendor-tab-profile">User Profile</a></li>
+            <li><a class="sidebar-link" id="vendor-logout-btn" style="color: var(--accent-red); margin-top: 2rem;">Logout</a></li>
+          </ul>
+        </aside>
+
+        <!-- Dynamic sub-tabs within the Vendor Portal -->
+        <div class="dashboard-content-area">
+          
+          <!-- SUB-TAB 5: Dashboard Overview -->
+          <div id="vendor-tab-dashboard" class="dash-tab-content" style="display: block;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2 id="vendor-welcome-title">Acme Dashboard</h2>
+                <p>Track your ongoing acquisitions, notifications, and verification files.</p>
+              </div>
+            </div>
+
+            <!-- Stats Mini row -->
+            <div class="dash-stats-row">
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Saved Tenders</span>
+                <div class="dash-stat-val" id="vendor-stats-saved">0</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Applied Tenders</span>
+                <div class="dash-stat-val" style="color: var(--accent-cyan);" id="vendor-stats-applied">0</div>
+              </div>
+              <div class="dash-stat-card">
+                <span class="dash-stat-label">Verified Documents</span>
+                <div class="dash-stat-val" style="color: var(--accent-green);" id="vendor-stats-docs">0/0</div>
+              </div>
+            </div>
+
+            <!-- Notification Highlight Banner -->
+            <div id="dashboard-notif-banner" style="display:none; cursor:pointer;" onclick="openVendorTab('vendor-tab-notifications')"></div>
+
+            <h3 class="detail-section-title" style="border:none; margin-top:2rem; margin-bottom:1rem;">Quick Access Controls</h3>
+            <div class="quick-access-grid" style="margin-top:0;">
+              <div class="quick-card" onclick="openVendorTab('vendor-tab-browse')">
+                <div class="quick-card-icon">🔍</div>
+                <span class="quick-card-title">Browse Catalogs</span>
+                <span class="quick-card-desc">Find matching public tenders</span>
+              </div>
+              <div class="quick-card" onclick="openVendorTab('vendor-tab-documents')">
+                <div class="quick-card-icon">📂</div>
+                <span class="quick-card-title">Manage Files</span>
+                <span class="quick-card-desc">Upload company certificates</span>
+              </div>
+              <div class="quick-card" onclick="openVendorTab('vendor-tab-profile')">
+                <div class="quick-card-icon">👤</div>
+                <span class="quick-card-title">Edit Profile</span>
+                <span class="quick-card-desc">Verify corporate identity</span>
+              </div>
+            </div>
+
+            <!-- Recent activities list -->
+            <div class="ticket-history-card" style="margin-top: 2.5rem;">
+              <h3 class="detail-section-title" style="border:none; margin:0;">Recent Bid Activity</h3>
+              <div class="ticket-history-list" id="vendor-dashboard-activity-list">
+                <div class="ticket-item" style="color:var(--text-secondary); text-align:center; justify-content:center;">No recent activities recorded</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 6: Tender Listing (Search Results page included) -->
+          <div id="vendor-tab-browse" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Browse Public Tenders</h2>
+                <p>Apply filters below to search matching government tenders.</p>
+              </div>
+            </div>
+
+            <!-- Dynamic Filters -->
+            <div class="filter-panel">
+              <div class="filter-group">
+                <label for="filter-search">Keyword Search</label>
+                <input type="text" id="filter-search" placeholder="Search title or ID...">
+              </div>
+              <div class="filter-group">
+                <label for="filter-category">Category</label>
+                <select id="filter-category">
+                  <option value="All">All Categories</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                  <option value="Energy">Energy</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Education">Education</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="filter-ministry">Department</label>
+                <select id="filter-ministry">
+                  <option value="All">All Departments</option>
+                  <option value="Works">Ministry of Public Works</option>
+                  <option value="Energy">Ministry of Energy & Minerals</option>
+                  <option value="Tech">Ministry of Technology</option>
+                  <option value="Edu">Ministry of Education</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="filter-budget">Max Budget (INR ₹)</label>
+                <input type="number" id="filter-budget" placeholder="Maximum amount">
+              </div>
+              <div class="filter-group" style="flex-direction:row; gap:0.5rem;">
+                <button class="btn btn-primary" id="btn-apply-filters" style="padding:0.6rem 1rem; font-size:0.8rem; flex:1;">Filter</button>
+                <button class="btn btn-outline" id="btn-clear-filters" style="padding:0.6rem 1rem; font-size:0.8rem; border-radius:8px;">Clear</button>
+              </div>
+            </div>
+
+            <!-- Catalog listings grid container -->
+            <div class="tender-grid" id="public-tenders-listing-grid">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- SUB-TAB 10: Saved Tenders Screen -->
+          <div id="vendor-tab-saved" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Saved Tenders</h2>
+                <p>Bookmark acquisitions to review and apply later.</p>
+              </div>
+            </div>
+            <div class="tender-grid" id="saved-tenders-listing-grid">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- SUB-TAB 11: My Applications Screen -->
+          <div id="vendor-tab-applications" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>My Applications</h2>
+                <p>Track statuses, signatures, and credentials for your submitted bids.</p>
+              </div>
+            </div>
+            
+            <div class="tender-table-container">
+              <table class="tender-table">
+                <thead>
+                  <tr>
+                    <th>Ref ID</th>
+                    <th>Tender Name</th>
+                    <th>Bid Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="vendor-applications-tbody">
+                  <!-- JS generated rows go here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 14: Document Management Screen -->
+          <div id="vendor-tab-documents" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Document Repository</h2>
+                <p>Upload files requested for tender registrations. Verify their status below.</p>
+              </div>
+              <button class="btn btn-primary" id="btn-trigger-upload-doc" style="border-radius:8px; font-size:0.8rem;">Upload Document</button>
+            </div>
+
+            <div class="alert-banner-success" id="doc-upload-success-banner" style="display:none;">
+              Document successfully uploaded and registered in registry.
+            </div>
+
+            <!-- Upload mock file input -->
+            <div class="tender-form-card" id="doc-upload-form-card" style="display:none; margin-bottom:2rem;">
+              <h3 class="detail-section-title" style="border:none; margin-top:0;">Register Document</h3>
+              <form id="doc-register-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="doc-upload-name">Document Title</label>
+                    <input type="text" id="doc-upload-name" placeholder="e.g. ISO 9001 Certificate" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="doc-upload-expiry">Expiration Date</label>
+                    <input type="date" id="doc-upload-expiry" required>
+                  </div>
+                </div>
+                <div style="text-align: right; display:flex; gap:0.5rem; justify-content:flex-end;">
+                  <button type="button" class="btn btn-outline" id="btn-cancel-upload-doc" style="padding:0.5rem 1rem; font-size:0.8rem;">Cancel</button>
+                  <button type="submit" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.8rem;">Submit Uploader</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="document-grid" id="vendor-documents-grid">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- SUB-TAB 12: Notifications Screen -->
+          <div id="vendor-tab-notifications" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>System Notifications</h2>
+                <p>Stay up to date with bid evaluations and deadline reminders.</p>
+              </div>
+              <button class="btn btn-outline" id="btn-mark-all-read" style="border-radius:8px; font-size:0.8rem;">Mark all as Read</button>
+            </div>
+            
+            <div class="notifications-list" id="vendor-notifications-container">
+              <!-- Dynamic notifications rows go here -->
+            </div>
+          </div>
+
+          <!-- SUB-TAB 13: User Profile Screen -->
+          <div id="vendor-tab-profile" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>Corporate Profile</h2>
+                <p>Manage legal company name details and key credentials registered on eSignet.</p>
+              </div>
+            </div>
+
+            <div class="tender-form-card">
+              <form id="vendor-profile-edit-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Signee Legal Name</label>
+                    <input type="text" id="profile-user-name" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Assigned ID</label>
+                    <input type="text" id="profile-user-id" readonly style="background:rgba(255,255,255,0.05); color:var(--text-secondary); cursor:not-allowed;">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Registered Company</label>
+                    <input type="text" id="profile-company-name" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Phone Contact</label>
+                    <input type="text" id="profile-user-phone" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Linked eSignet Email</label>
+                  <input type="email" id="profile-user-email" required>
+                </div>
+                <div class="form-actions" style="margin-top:1.5rem; padding-top:1rem;">
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>

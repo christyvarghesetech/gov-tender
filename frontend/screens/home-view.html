@@ -1,0 +1,201 @@
+<main id="home-view" class="view-section active-view">
+      <section class="hero">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Powered by eSignet & MOSIP Infrastructure
+        </div>
+        <h1>Secure Government <br><span class="gradient-text">Tender Verification</span> Platform</h1>
+        <p class="hero-subtitle">
+          Verify, Sign and Authenticate Government Tenders using Digital Identity and Verifiable Credentials.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="hero-get-started-btn">Get Started</button>
+          <button class="btn btn-outline" id="hero-verify-btn">Verify Tender</button>
+        </div>
+      </section>
+
+      <!-- Metrics Statistics Row -->
+      <section class="metrics-row">
+        <div class="metric-item">
+          <div class="metric-number">1,200+</div>
+          <div class="metric-label">Tenders Verified</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-number">99.9%</div>
+          <div class="metric-label">Uptime SLA</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-number">ISO 27001</div>
+          <div class="metric-label">Certified</div>
+        </div>
+      </section>
+
+      <!-- Floating Tender glass card from UI Mockup -->
+      <section class="floating-card-container">
+        <div class="tender-glass-card" id="interactive-tender-hero-card">
+          <div class="card-header">
+            <span class="card-title" id="hero-card-title">Tender #GOV-2024-1187</span>
+            <span class="verified-tag">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Verified
+            </span>
+          </div>
+          <div class="card-body-content">
+            <div class="info-grid">
+              <span class="info-label">Ministry:</span>
+              <span class="info-val" id="hero-card-ministry">Ministry of Public Works</span>
+              
+              <span class="info-label">Issued by:</span>
+              <span class="info-val" id="hero-card-issuer">Dept. of Infrastructure</span>
+              
+              <span class="info-label">Valid Until:</span>
+              <span class="info-val" id="hero-card-date">31 December 2025</span>
+              
+              <span class="info-label">Credential ID:</span>
+              <span class="info-val-mono" id="hero-card-vc-id">VC-8F2A-19CC-BEEF</span>
+            </div>
+            <div class="qr-box-wrapper">
+              <div class="qr-box">
+                <canvas class="qr-code-canvas" id="hero-qr-canvas"></canvas>
+              </div>
+              <span class="qr-caption">Scan to verify</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Browse Categories Section -->
+      <section style="margin-bottom: 5rem;">
+        <div class="section-header">
+          <span class="section-tag">Browse Tenders</span>
+          <h2 class="section-title">Browse by Category</h2>
+          <p class="section-desc">Quickly find acquisitions matching your field of expertise.</p>
+        </div>
+        <div class="quick-access-grid">
+          <div class="quick-card" onclick="browseCategory('Infrastructure')">
+            <div class="quick-card-icon">🏛️</div>
+            <span class="quick-card-title">Infrastructure</span>
+            <span class="quick-card-desc">Public Works, Roads & Bridges</span>
+          </div>
+          <div class="quick-card" onclick="browseCategory('Energy')">
+            <div class="quick-card-icon">⚡</div>
+            <span class="quick-card-title">Energy</span>
+            <span class="quick-card-desc">Solar Power, Grids & Clean Energy</span>
+          </div>
+          <div class="quick-card" onclick="browseCategory('Technology')">
+            <div class="quick-card-icon">💻</div>
+            <span class="quick-card-title">Technology</span>
+            <span class="quick-card-desc">Software, Data Centers & Telecom</span>
+          </div>
+          <div class="quick-card" onclick="browseCategory('Education')">
+            <div class="quick-card-icon">🎓</div>
+            <span class="quick-card-title">Education</span>
+            <span class="quick-card-desc">Schools, Tablets & Training</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Latest Tenders Section -->
+      <section style="margin-bottom: 5rem;">
+        <div class="section-header">
+          <span class="section-tag">Latest Updates</span>
+          <h2 class="section-title">Featured Tenders</h2>
+          <p class="section-desc">Active listings published on the cryptographic ledger.</p>
+        </div>
+        <div class="tender-grid" id="home-featured-tenders">
+          <!-- Dynamic cards populated by app.js -->
+        </div>
+        <div style="text-align: center; margin-top: 3rem;">
+          <button class="btn btn-outline" id="home-all-tenders-btn">View All Listings</button>
+        </div>
+      </section>
+
+      <!-- Core Capabilities Section -->
+      <section class="capabilities-section">
+        <div class="section-header">
+          <span class="section-tag">Core Capabilities</span>
+          <h2 class="section-title">Built for Trust & Transparency</h2>
+          <p class="section-desc">Every tender, signed, verified and tamper-proof — from issuance to audit.</p>
+        </div>
+        
+        <div class="capabilities-grid">
+          <!-- Card 1 -->
+          <div class="capability-card">
+            <div class="capability-icon-container">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h3>Digital Identity Authentication</h3>
+            <p>Authenticate officials using eSignet-powered digital identity. No passwords, no forgeries.</p>
+            <a class="learn-more" id="cap-learn-auth">Learn more &rarr;</a>
+          </div>
+          <!-- Card 2 -->
+          <div class="capability-card">
+            <div class="capability-icon-container">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </div>
+            <h3>Digital Signing</h3>
+            <p>Tenders signed with cryptographic keys ensure tamper-evident, legally-binding records.</p>
+            <a class="learn-more" id="cap-learn-sign">Learn more &rarr;</a>
+          </div>
+          <!-- Card 3 -->
+          <div class="capability-card">
+            <div class="capability-icon-container">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="13" y2="16"></line></svg>
+            </div>
+            <h3>Verifiable Credentials</h3>
+            <p>W3C-compliant VCs issued per tender, enabling instant machine-readable proof.</p>
+            <a class="learn-more" id="cap-learn-vc">Learn more &rarr;</a>
+          </div>
+          <!-- Card 4 -->
+          <div class="capability-card">
+            <div class="capability-icon-container">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            </div>
+            <h3>QR Verification</h3>
+            <p>Any stakeholder can scan and verify a tender's authenticity in seconds — no login needed.</p>
+            <a class="learn-more" id="cap-learn-qr">Learn more &rarr;</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it Works section -->
+      <section class="timeline-section">
+        <div class="section-header">
+          <span class="section-tag">How It Works</span>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-line">
+            <div class="timeline-line-progress" id="home-timeline-progress"></div>
+          </div>
+          <div class="timeline-step active" data-step="1">
+            <div class="step-node">1</div>
+            <span class="step-label">Submit Tender</span>
+          </div>
+          <div class="timeline-step" data-step="2">
+            <div class="step-node">2</div>
+            <span class="step-label">Authenticate Identity</span>
+          </div>
+          <div class="timeline-step" data-step="3">
+            <div class="step-node">3</div>
+            <span class="step-label">Sign & Issue VC</span>
+          </div>
+          <div class="timeline-step" data-step="4">
+            <div class="step-node">4</div>
+            <span class="step-label">Share QR Code</span>
+          </div>
+          <div class="timeline-step" data-step="5">
+            <div class="step-node">5</div>
+            <span class="step-label">Verify Instantly</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ready to Verify CTA Card -->
+      <section class="cta-banner-container">
+        <div class="cta-banner">
+          <h2 class="cta-title">Ready to verify a tender?</h2>
+          <p class="cta-subtitle">Instant, tamper-proof verification — no account required.</p>
+          <button class="btn btn-primary" id="cta-verify-now-btn">Verify Now &rarr;</button>
+        </div>
+      </section>
+    </main>

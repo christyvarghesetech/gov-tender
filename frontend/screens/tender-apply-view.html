@@ -1,0 +1,50 @@
+<main id="tender-apply-view" class="view-section">
+      <div class="help-container">
+        <div class="section-header">
+          <span class="section-tag">Submission Bid</span>
+          <h2 class="section-title" id="apply-screen-title">Apply for Tender</h2>
+          <p class="section-desc">Submit your company bid proposal and digital documents on the ledger registry.</p>
+        </div>
+
+        <div class="tender-form-card">
+          <form id="tender-bid-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" id="apply-company-name" readonly style="background:rgba(255,255,255,0.05); color:var(--text-secondary); cursor:not-allowed;">
+              </div>
+              <div class="form-group">
+                <label for="apply-bid-value">Bid Proposal Value (INR ₹)</label>
+                <input type="number" id="apply-bid-value" placeholder="Enter bid budget projection" required>
+              </div>
+            </div>
+
+            <!-- Drag & Drop Uploader -->
+            <div class="form-group">
+              <label>Bid Proposal Documents (PDF)</label>
+              <div class="upload-zone" id="bid-upload-zone" style="padding: 2rem 1rem;">
+                <span style="font-size:2rem; display:block; margin-bottom:0.5rem;">📁</span>
+                <h4 style="margin-bottom:0.25rem;">Upload Technical & Financial Bids</h4>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem;">PDF files are cryptographically registered</p>
+                <input type="file" id="bid-file-uploader" style="display:none;" accept="application/pdf">
+                <button type="button" class="btn btn-outline" id="bid-browse-btn" style="padding:0.4rem 1rem; font-size:0.8rem;">Select File</button>
+                <div id="uploaded-bid-filename" style="margin-top:1rem; font-size:0.85rem; color:var(--accent-cyan); font-weight:600;"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label style="display:flex; align-items:flex-start; gap:0.5rem; text-transform:none; font-weight:normal;">
+                <input type="checkbox" id="apply-declare" style="width:auto; margin-top:0.25rem;" required>
+                <span>I declare that all uploaded corporate tax files and project details are correct and legally binding. I authorize verification via eSignet keys.</span>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="apply-cancel-btn">Cancel</button>
+              <button type="button" class="btn btn-secondary" onclick="saveApplicationDraft()">Save Draft</button>
+              <button type="submit" class="btn btn-primary">Submit Application</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
