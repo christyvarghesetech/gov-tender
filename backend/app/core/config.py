@@ -12,6 +12,7 @@ PORT = int(os.getenv("PORT", "8080"))
 
 # eSignet (OIDC) Configurations
 ESIGNET_BASE_URL = os.getenv("ESIGNET_BASE_URL", "https://esignet.collab.mosip.net").strip()
+ESIGNET_AUTHORIZE_URL = os.getenv("ESIGNET_AUTHORIZE_URL", "http://localhost:3000/authorize").strip()
 ESIGNET_CLIENT_ID = os.getenv("ESIGNET_CLIENT_ID", "your-esignet-client-id").strip()
 ESIGNET_CLIENT_SECRET = os.getenv("ESIGNET_CLIENT_SECRET", "your-esignet-client-secret").strip()
 ESIGNET_REDIRECT_URI = os.getenv("ESIGNET_REDIRECT_URI", "http://localhost:8080/api/auth/esignet/callback").strip()

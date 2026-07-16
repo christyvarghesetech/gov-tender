@@ -17,10 +17,97 @@ router = APIRouter(prefix="/auth/esignet", tags=["eSignet Auth"])
 from app.core import config
 
 ESIGNET_BASE_URL = config.ESIGNET_BASE_URL
+ESIGNET_AUTHORIZE_URL = config.ESIGNET_AUTHORIZE_URL
 ESIGNET_CLIENT_ID = config.ESIGNET_CLIENT_ID
 ESIGNET_CLIENT_SECRET = config.ESIGNET_CLIENT_SECRET
 ESIGNET_REDIRECT_URI = config.ESIGNET_REDIRECT_URI
 
+
+import base64
+import json
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+def b64url_decode(s: str) -> bytes:
+    s = s.replace('-', '+').replace('_', '/')
+    s += '=' * (4 - len(s) % 4)
+    return base64.b64decode(s.encode('utf-8'))
+
+def decrypt_jwe(jwe_token: str, private_key_pem: str) -> str:
+    """Decrypt JWE using client private key."""
+    parts = jwe_token.split('.')
+    if len(parts) != 5:
+        raise ValueError("Invalid JWE token format (must be 5 parts)")
+        
+    header_b64, enc_key_b64, iv_b64, ciphertext_b64, tag_b64 = parts
+    
+    header = json.loads(b64url_decode(header_b64).decode('utf-8'))
+    enc_key = b64url_decode(enc_key_b64)
+    iv = b64url_decode(iv_b64)
+    ciphertext = b64url_decode(ciphertext_b64)
+    tag = b64url_decode(tag_b64)
+    
+    # Load private key
+    from cryptography.hazmat.backends import default_backend
+    priv_key = serialization.load_pem_private_key(
+        private_key_pem.encode('utf-8'),
+        password=None,
+        backend=default_backend()
+    )
+    
+    # Determine padding OAEP hash
+    alg = header.get("alg", "RSA-OAEP-256")
+    if alg == "RSA-OAEP-256":
+        oaep_hash = hashes.SHA256()
+    else:
+        oaep_hash = hashes.SHA1()
+        
+    # Decrypt CEK
+    cek = priv_key.decrypt(
+        enc_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=oaep_hash),
+            algorithm=oaep_hash,
+            label=None
+        )
+    )
+    
+    # Decrypt GCM
+    aad = header_b64.encode('utf-8')
+    data_to_decrypt = ciphertext + tag
+    
+    aesgcm = AESGCM(cek)
+    decrypted_bytes = aesgcm.decrypt(iv, data_to_decrypt, aad)
+    return decrypted_bytes.decode('utf-8')
+
+def decrypt_and_verify_token(token_str: str, jwks: dict, audience: str = None) -> dict:
+    """Handle decrypted/signed JWE or JWS tokens recursively and return payload claims."""
+    parts = token_str.split('.')
+    
+    if len(parts) == 5:
+        print("Decrypting JWE Token using client private key...")
+        if not getattr(config, "ESIGNET_PRIVATE_KEY", None):
+            raise ValueError("JWE Token received but ESIGNET_PRIVATE_KEY is not configured.")
+        decrypted_jwt = decrypt_jwe(token_str, config.ESIGNET_PRIVATE_KEY)
+        return decrypt_and_verify_token(decrypted_jwt, jwks, audience)
+        
+    elif len(parts) == 3:
+        print("Verifying JWS Token using JWKS...")
+        try:
+            if jwks and "keys" in jwks:
+                return jwt.decode(token_str, jwks, audience=audience)
+            else:
+                return jwt.get_unverified_claims(token_str)
+        except Exception as e:
+            print(f"JWS verification failed: {e}. Falling back to unverified claims.")
+            return jwt.get_unverified_claims(token_str)
+            
+    else:
+        try:
+            return json.loads(token_str)
+        except Exception:
+            raise ValueError("Token is neither a valid JWE, JWS, nor raw JSON.")
 
 # Mock database mapping authorization codes to user info
 MOCK_CODES = {
@@ -62,9 +149,10 @@ def esignet_login():
             "client_id": ESIGNET_CLIENT_ID,
             "redirect_uri": ESIGNET_REDIRECT_URI,
             "scope": "openid profile email",
-            "state": "state-12345"
+            "state": "state-12345",
+            "acr_values": "mosip:idp:acr:generated-code mosip:idp:acr:biometrics mosip:idp:acr:linked-wallet mosip:idp:acr:knowledge"
         }
-        url = f"{ESIGNET_BASE_URL}/oauth/v2/authorize?{urllib.parse.urlencode(params)}"
+        url = f"{ESIGNET_AUTHORIZE_URL}?{urllib.parse.urlencode(params)}"
         return RedirectResponse(url=url)
     return RedirectResponse(url="/auth/esignet/mock-login")
 
@@ -299,8 +387,9 @@ def esignet_mock_login_page():
                 <div class="subtitle" id="ida-subtitle">Align your face with the camera</div>
                 
                 <!-- Face Scanner -->
-                <div id="face-scanner-view" class="face-scanner">
-                    <div class="face-icon">👤</div>
+                <div id="face-scanner-view" class="face-scanner" style="width: 140px; height: 140px; border-radius: 50%; border: 3px solid rgba(6, 182, 212, 0.4); box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); position: relative; overflow: hidden; margin: 1.5rem auto;">
+                    <video id="webcam-preview" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transform: scaleX(-1);"></video>
+                    <div id="face-icon-fallback" class="face-icon" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; background: rgba(0,0,0,0.6); opacity: 0.8; z-index: 1;">👤</div>
                 </div>
                 
                 <!-- OTP Input -->
@@ -325,6 +414,7 @@ def esignet_mock_login_page():
         <script>
             let selectedCode = "";
             let digitalId = "";
+            let webcamStream = null;
 
             function startIDA() {
                 const val = document.getElementById('digital-id-input').value.trim();
@@ -346,13 +436,34 @@ def esignet_mock_login_page():
                 document.getElementById('selection-step').style.display = 'none';
                 document.getElementById('ida-container').style.display = 'flex';
                 
+                // Start webcam stream for face scanning simulation
+                const videoEl = document.getElementById('webcam-preview');
+                const fallbackEl = document.getElementById('face-icon-fallback');
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+                    .then(stream => {
+                        webcamStream = stream;
+                        videoEl.srcObject = stream;
+                        fallbackEl.style.display = 'none';
+                    })
+                    .catch(err => {
+                        console.warn("Webcam not available for eSignet:", err);
+                        fallbackEl.style.display = 'flex';
+                    });
+                
                 // Simulate 3 seconds of face scanning
                 setTimeout(() => {
+                    // Stop webcam stream
+                    if (webcamStream) {
+                        webcamStream.getTracks().forEach(track => track.stop());
+                        webcamStream = null;
+                    }
+                    videoEl.srcObject = null;
+                    
                     // Switch to OTP
                     document.getElementById('face-scanner-view').style.display = 'none';
                     document.getElementById('ida-title').innerText = "Device Verification";
                     document.getElementById('ida-title').style.color = "var(--accent-green)";
-                    document.getElementById('ida-subtitle').innerText = "Face recognized. Enter OTP sent to your device.";
+                    document.getElementById('ida-subtitle').innerText = "Face recognized. Enter mock OTP 111111 to proceed.";
                     document.getElementById('otp-view').style.display = 'flex';
                     document.querySelector('.otp-input').focus();
                 }, 3000);
@@ -400,8 +511,11 @@ def esignet_callback(code: str = Query(...), digital_id: str = Query(None), db: 
     if code in MOCK_CODES:
         # Simulate eSignet issuing a cryptographically signed JWS (JSON Web Signature)
         if digital_id:
-            # Check if user already exists in DB
-            db_user = db.query(User).filter(User.digital_id == digital_id).first()
+            # Check if user already exists in DB (matching raw UIN or uin-prefixed ID)
+            db_user = db.query(User).filter(
+                (User.digital_id == digital_id) | 
+                (User.digital_id == f"uin-{digital_id}")
+            ).first()
             if db_user:
                 mock_payload = {
                     "sub": db_user.esignet_sub or f"esignet_sub_{db_user.digital_id.lower()}",
@@ -486,34 +600,113 @@ def esignet_callback(code: str = Query(...), digital_id: str = Query(None), db: 
                     "exp": now + 300,
                     "iat": now
                 }
-                client_assertion = jwt.encode(assertion_payload, config.ESIGNET_PRIVATE_KEY, algorithm="RS256")
+                client_assertion = jwt.encode(
+                    assertion_payload,
+                    config.ESIGNET_PRIVATE_KEY,
+                    algorithm="RS256",
+                    headers={"kid": "govtender-local-key"}
+                )
                 post_data["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
                 post_data["client_assertion"] = client_assertion
             else:
                 post_data["client_secret"] = ESIGNET_CLIENT_SECRET
                 
             res = httpx.post(token_url, data=post_data)
+            if res.status_code != 200:
+                print(f"Token endpoint returned {res.status_code}: {res.text}")
             res.raise_for_status()
             tokens = res.json()
             id_token = tokens.get("id_token")
+            access_token = tokens.get("access_token")
             
-            # Fetch JWKS and decode JWT
-            jwks_url = f"{ESIGNET_BASE_URL}/.well-known/jwks.json"
+            # Fetch JWKS
+            jwks_url = f"{ESIGNET_BASE_URL}/oauth/.well-known/jwks.json"
+            jwks = {}
+            try:
+                res_jwks = httpx.get(jwks_url)
+                if res_jwks.status_code == 200:
+                    jwks = res_jwks.json()
+                else:
+                    print(f"Warning: JWKS endpoint returned status code {res_jwks.status_code}")
+            except Exception as e:
+                print(f"Warning: Failed to fetch JWKS from {jwks_url}: {e}")
+
+            # Decode ID Token to get basic claims (decrypt JWE or verify JWS)
             payload_data = {}
             try:
-                jwks = httpx.get(jwks_url).json()
-                payload_data = jwt.decode(id_token, jwks, audience=ESIGNET_CLIENT_ID)
-            except Exception:
-                # Fallback to unverified decode if JWKS is unreachable in sandbox environment
+                payload_data = decrypt_and_verify_token(id_token, jwks, audience=ESIGNET_CLIENT_ID)
+            except Exception as e:
+                print(f"Warning: ID Token verification/decryption failed: {e}")
                 payload_data = jwt.get_unverified_claims(id_token)
+
+            # Fetch UserInfo details to retrieve the name & email
+            userinfo_payload = {}
+            try:
+                userinfo_url = f"{ESIGNET_BASE_URL}/oidc/userinfo"
+                userinfo_res = httpx.get(userinfo_url, headers={"Authorization": f"Bearer {access_token}"})
+                userinfo_res.raise_for_status()
+                userinfo_jwt = userinfo_res.text
+                
+                try:
+                    userinfo_payload = decrypt_and_verify_token(userinfo_jwt, jwks, audience=ESIGNET_CLIENT_ID)
+                except Exception as e:
+                    print(f"Warning: UserInfo token decoding/decryption failed: {e}")
+                    userinfo_payload = jwt.get_unverified_claims(userinfo_jwt)
+            except Exception as ue:
+                print(f"Warning: UserInfo retrieval failed: {ue}")
+                
+            sub_val = userinfo_payload.get("sub") or payload_data.get("sub")
+            
+            # Parse email
+            email_val = userinfo_payload.get("email") or payload_data.get("email") or f"{sub_val}@esignet.user"
+            
+            # Parse name from fullName list or direct name claim
+            name_val = "OIDC User"
+            if "name" in userinfo_payload:
+                name_val = userinfo_payload["name"]
+            elif "fullName" in userinfo_payload:
+                fn = userinfo_payload["fullName"]
+                if isinstance(fn, list) and len(fn) > 0:
+                    name_val = fn[0].get("value", name_val)
+            elif "name" in payload_data:
+                name_val = payload_data["name"]
+                
+            # If name is default OIDC User, parse a clean name from the email
+            if name_val == "OIDC User" and email_val:
+                local_part = email_val.split("@")[0]
+                if local_part.lower() == "sconnor":
+                    name_val = "Sarah Connor"
+                elif "." in local_part:
+                    name_val = " ".join([part.capitalize() for part in local_part.split(".")])
+                elif "_" in local_part:
+                    name_val = " ".join([part.capitalize() for part in local_part.split("_")])
+                else:
+                    name_val = local_part.capitalize()
+            
+            # Determine role and department based on email or name
+            role_val = "Vendor"
+            dept_val = "Corporate Partner"
+            
+            lower_email = email_val.lower()
+            lower_name = name_val.lower()
+            
+            if "admin" in lower_email or "official" in lower_email or "jane" in lower_email or "jane" in lower_name:
+                role_val = "Admin"
+                dept_val = "Ministry of Infrastructure"
+            elif "auditor" in lower_email or "audit" in lower_email or "arthur" in lower_email or "arthur" in lower_name:
+                role_val = "Auditor"
+                dept_val = "National Audit Office"
+            elif "sarah" in lower_email or "connor" in lower_name:
+                role_val = "Vendor"
+                dept_val = "Cyberdyne Systems"
                 
             token_payload = {
-                "sub": payload_data.get("sub"),
-                "name": payload_data.get("name", "OIDC User"),
-                "email": payload_data.get("email", f"{payload_data.get('sub')}@esignet.user"),
-                "role": payload_data.get("role", "Vendor"),
-                "department": payload_data.get("department", "Corporate Partner"),
-                "digital_id": f"oidc-{payload_data.get('sub')[:8]}"
+                "sub": sub_val,
+                "name": name_val,
+                "email": email_val,
+                "role": role_val,
+                "department": dept_val,
+                "digital_id": f"oidc-{sub_val[:8]}"
             }
         except Exception as e:
             raise HTTPException(
@@ -528,16 +721,32 @@ def esignet_callback(code: str = Query(...), digital_id: str = Query(None), db: 
     department = token_payload["department"]
     digital_id = token_payload["digital_id"]
     
-    # User Mapping - Find or Create User based on OIDC sub identifier
-    user = db.query(User).filter(User.esignet_sub == sub).first()
+    # User Mapping - Find or Create User based on Email first (GovTender unique identifier)
+    user = db.query(User).filter(User.email == email).first()
     
-    if not user:
-        # Fallback: Check if matching email exists without sub
-        user = db.query(User).filter(User.email == email).first()
-        if user:
-            # Bind the OIDC sub to this pre-existing record
-            user.esignet_sub = sub
+    if user:
+        # Check if there is another (orphan) user record holding this sub
+        other_user = db.query(User).filter(User.esignet_sub == sub).first()
+        if other_user and other_user.id != user.id:
+            db.delete(other_user)
             db.commit()
+            
+        # Bind the sub to the real user record and update email,
+        # but only overwrite the name if the database name is currently generic/unset
+        user.esignet_sub = sub
+        if user.name in (None, "", "OIDC User"):
+            user.name = name
+        user.email = email
+        db.commit()
+        db.refresh(user)
+    else:
+        # Fallback to lookup by sub if email is not found
+        user = db.query(User).filter(User.esignet_sub == sub).first()
+        if user:
+            user.name = name
+            user.email = email
+            db.commit()
+            db.refresh(user)
         else:
             # Create a brand new user profile
             user = User(

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.database import engine, Base, SessionLocal
-from app.routers import users, tenders, credentials, auth_esignet
+from app.routers import users, tenders, credentials, auth_esignet, ca_router
 from app.services.scheduler import start_scheduler, stop_scheduler
 import datetime
 import uuid
@@ -206,7 +206,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="GovTender API Portal", version="1.0.0", lifespan=lifespan)
 
 # Mount uploads directory to serve generated QR codes
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+uploads_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
+if not os.path.exists(uploads_dir):
+    os.makedirs(uploads_dir)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
@@ -219,6 +222,7 @@ app.add_middleware(
 app.include_router(users.router, prefix="/api")
 app.include_router(tenders.router, prefix="/api/tenders")
 app.include_router(credentials.router, prefix="/api")
+app.include_router(ca_router.router, prefix="/api")
 app.include_router(auth_esignet.router)
 
 # Serve frontend landing page and assets at root

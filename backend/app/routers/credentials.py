@@ -177,6 +177,10 @@ def get_applications(db: Session = Depends(get_db), current_user=Depends(require
         else:
             status = "locked"
             
+        credential = None
+        if status == "approved" and tender:
+            credential = db.query(Credential).filter(Credential.tender_id == tender.id).first()
+
         res.append({
             "refNo": b.id.hex[:8].upper(),
             "id": b.id.hex,
@@ -187,7 +191,10 @@ def get_applications(db: Session = Depends(get_db), current_user=Depends(require
             "signee": vendor.name if vendor else "Unknown Vendor",
             "email": vendor.email if vendor else "unknown@vendor.com",
             "status": status,
-            "date": b.created_at.strftime("%Y-%m-%d") if b.created_at else ""
+            "date": b.created_at.strftime("%Y-%m-%d") if b.created_at else "",
+            "qr_code_url": credential.qr_code_url if credential else None,
+            "credential_offer_uri": credential.vc_id if credential else None,
+            "tx_code": credential.issuer_did.replace("tx_code:", "") if credential and credential.issuer_did and credential.issuer_did.startswith("tx_code:") else None
         })
     return res
 
@@ -331,6 +338,64 @@ def update_application_status(
         timestamp=datetime.datetime.utcnow()
     )
     db.add(log_entry)
+    
+    # If the bid is approved, issue a signed Verifiable Credential using Inji Certify
+    if status == "approved":
+        # Decrypt the bid value to carry it in the VC
+        bid_value = 0.0
+        if tender.private_key and bid.encrypted_bid_value:
+            try:
+                from app.services.crypto_service import decrypt_with_private_key
+                bid_value = float(decrypt_with_private_key(tender.private_key, bid.encrypted_bid_value))
+            except Exception as e:
+                print(f"[VC ISSUANCE ERROR] Decryption failed: {e}")
+                
+        # Trigger Inji Certify Pre-Auth flow
+        from app.services.inji_service import issue_inji_preauthorized_offer
+        from app.core import config
+        
+        claims = {
+            "tenderId": tender.tender_number,
+            "value": bid_value,
+            "approvingAuthority": tender.department or "Ministry of Infrastructure",
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z"
+        }
+        
+        template_id = config.INJI_CERTIFY_TEMPLATE_ID or "GovernmentTenderCredential"
+        try:
+            offer_data = issue_inji_preauthorized_offer(
+                credential_config_id=template_id,
+                claims=claims
+            )
+            
+            # Save the issued VC offer details in database
+            hex_code = "".join([random.choice("0123456789ABCDEF") for _ in range(8)])
+            vc_display_id = f"VC-AWARD-{hex_code[:4]}-{hex_code[4:]}"
+            
+            # Clean up old credentials for this tender to prevent duplication
+            db.query(Credential).filter(Credential.tender_id == tender.id).delete()
+            
+            new_cred = Credential(
+                id=uuid.uuid4(),
+                credential_id=vc_display_id,
+                tender_id=tender.id,
+                issued_by=current_user.id,
+                issue_date=datetime.datetime.utcnow(),
+                status="verified",
+                qr_code_url=offer_data["qr_code_url"],
+                vc_id=offer_data.get("credential_offer_uri"),  # Store the real credential offer URI
+                issuer_did=f"tx_code:{offer_data['tx_code']}",  # Store tx_code
+                credential_json={
+                    "claims": claims,
+                    "tx_code": offer_data["tx_code"],
+                    "credential_offer_uri": offer_data["credential_offer_uri"],
+                    "status": offer_data["status"]
+                }
+            )
+            db.add(new_cred)
+        except Exception as e:
+            print(f"[VC ISSUANCE ERROR] Failed to generate Pre-Auth credential: {e}")
+
     db.commit()
     db.refresh(bid)
 

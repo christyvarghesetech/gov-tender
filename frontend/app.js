@@ -199,6 +199,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Handle OIDC Callback Login Redirect
   const urlParams = new URLSearchParams(window.location.search);
   const loginDid = urlParams.get('login_did');
+  const action = urlParams.get('action');
   if (loginDid) {
     try {
       const res = await fetch(`${API_BASE}/login`, {
@@ -233,6 +234,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Set default view on load
   if (loginDid) {
     // Handled above
+  } else if (action && action.startsWith('register')) {
+    switchView('register-view');
+    // Clear the query parameter from the URL bar without reloading
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
   } else if (currentUser) {
     // If returning user is already logged in, redirect to their portal immediately
     if (currentUser.role === 'Admin') {
@@ -1236,6 +1242,13 @@ function renderVendorApplications() {
             style="padding:0.3rem 0.75rem; font-size:0.75rem; border-radius:6px; background:linear-gradient(135deg,#06b6d4,#00d97e); color:#030712; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; gap:0.3rem;">
             Generate PDF
           </button>
+          ${app.credential_offer_uri ? `
+          <button class="btn" 
+            onclick="showInjiWalletModal('${app.qr_code_url}', '${app.tx_code}')" 
+            style="padding:0.3rem 0.75rem; font-size:0.75rem; border-radius:6px; background:linear-gradient(135deg,#7c3aed,#4f46e5); color:#ffffff; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; gap:0.3rem;">
+            Add to Inji Wallet
+          </button>
+          ` : ''}
         </div>`;
     }
 
@@ -1249,6 +1262,29 @@ function renderVendorApplications() {
     tbody.appendChild(tr);
   });
 }
+
+window.showInjiWalletModal = function (qrCodeUrl, txCode) {
+  const modal = document.getElementById('inji-wallet-modal');
+  const qrImg = document.getElementById('inji-wallet-qr-img');
+  const txCodeEl = document.getElementById('inji-wallet-tx-code');
+
+  if (modal && qrImg && txCodeEl) {
+    qrImg.src = qrCodeUrl.startsWith('/api') ? qrCodeUrl : `${API_BASE.replace('/api', '')}${qrCodeUrl}`;
+    txCodeEl.textContent = txCode || '----';
+    modal.style.display = 'flex';
+  }
+};
+
+// Bind Inji Wallet Modal Close Event
+window.addEventListener('DOMContentLoaded', () => {
+  const closeBtn = document.getElementById('inji-wallet-close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      const modal = document.getElementById('inji-wallet-modal');
+      if (modal) modal.style.display = 'none';
+    });
+  }
+});
 
 window.downloadBidCertificate = async function (bidId) {
   try {
@@ -1530,77 +1566,49 @@ function renderSupportTickets() {
 
 function setupRegistrationForm() {
   const form = document.getElementById('registration-form');
-  form.addEventListener('submit', (e) => {
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    switchView('otp-view');
-    startOtpCountdown();
-  });
 
-  const otpInputs = document.querySelectorAll('#otp-view .otp-input');
-  otpInputs.forEach((input, index) => {
-    input.addEventListener('input', (e) => {
-      if (input.value && index < otpInputs.length - 1) {
-        otpInputs[index + 1].focus();
-      }
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !input.value && index > 0) {
-        otpInputs[index - 1].focus();
-      }
-    });
-  });
-
-  const otpForm = document.getElementById('registration-otp-form');
-  otpForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearInterval(currentTimer);
-
-    const name = document.getElementById('reg-name').value.trim();
+    const name    = document.getElementById('reg-name').value.trim();
+    const email   = document.getElementById('reg-email').value.trim();
     const company = document.getElementById('reg-company').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const phone = document.getElementById('reg-phone').value.trim();
+    const type    = document.getElementById('reg-type').value;
+
+    const submitBtn = document.getElementById('reg-submit-btn');
+    submitBtn.textContent = '⏳ Creating account…';
+    submitBtn.disabled = true;
 
     try {
       const res = await fetch(`${API_BASE}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name,
           email: email,
-          digital_id: email.split('@')[0],
-          role: "Vendor",
+          digital_id: '',       // backend will auto-generate from UIN
+          role: type,
           department: company
         })
-      }).then(r => r.json());
+      });
 
-      // Automatically log in newly registered vendor
-      const loginRes = await fetch(`${API_BASE}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ digital_id: res.digital_id })
-      }).then(r => r.json());
+      const data = await res.json();
 
-      currentUser = loginRes;
+      if (!res.ok) {
+        throw new Error(data.detail || 'Registration failed');
+      }
 
-      form.reset();
-      otpForm.reset();
+      // Show the UIN success card
+      document.getElementById('reg-form-panel').style.display  = 'none';
+      document.getElementById('reg-success-panel').style.display = 'block';
+      document.getElementById('reg-uin-display').textContent = data.uin || '—';
 
-      document.querySelectorAll('.role-select-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('role-btn-vendor').classList.add('active');
-
-      updateSessionUI();
-      alert(`Account for ${company} registered and verified via eSignet successfully!`);
-      switchView('vendor-portal-view');
-    } catch (e) {
-      alert("Error: Registration failed. Email or Digital ID might already be registered.");
-      switchView('register-view');
+    } catch (err) {
+      alert(`Registration failed: ${err.message}`);
+      submitBtn.textContent = 'Create Account & Get UIN';
+      submitBtn.disabled = false;
     }
-  });
-
-  document.getElementById('otp-resend-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    alert("New OTP verification code sent to your registered device registry.");
-    startOtpCountdown();
   });
 }
 
@@ -1651,6 +1659,13 @@ window.openAdminTab = async function openAdminTab(tabId) {
     renderAdminUsers();
   } else if (tabId === 'dash-tab-applications') {
     renderAdminApplications();
+  } else if (tabId === 'dash-tab-ca') {
+    renderCAKeystoreStatus();
+  } else if (tabId === 'dash-tab-settings') {
+    const setUsername = document.getElementById('set-username');
+    const setEmail = document.getElementById('set-email');
+    if (setUsername) setUsername.value = currentUser.name;
+    if (setEmail) setEmail.value = currentUser.email;
   }
 };
 
@@ -1833,6 +1848,187 @@ function setupAdminForms() {
       }
       openAdminTab('dash-tab-list');
     });
+  }
+  
+  setupCAWorkflow();
+}
+
+function setupCAWorkflow() {
+  const setupBtn = document.getElementById('ca-btn-generate-setup');
+  const modal = document.getElementById('ca-csr-form-modal');
+  const cancelBtn = document.getElementById('ca-csr-cancel-btn');
+  const form = document.getElementById('ca-csr-form');
+
+  if (setupBtn && modal) {
+    setupBtn.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+  }
+
+  if (cancelBtn && modal) {
+    cancelBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+
+  if (form && modal) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cn = document.getElementById('ca-form-cn').value.trim();
+      const org = document.getElementById('ca-form-org').value.trim();
+      const country = document.getElementById('ca-form-country').value.trim();
+
+      try {
+        const res = await fetch(`${API_BASE}/ca/csr/generate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ common_name: cn, organization: org, country: country })
+        }).then(r => r.json());
+
+        modal.style.display = 'none';
+        alert("Department Private Key and CSR generated successfully!");
+        renderCAKeystoreStatus();
+      } catch (err) {
+        alert("Failed to generate CSR.");
+      }
+    });
+  }
+
+  // Copy CSR
+  const copyBtn = document.getElementById('ca-btn-copy-csr');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const csrText = document.getElementById('ca-csr-text');
+      if (csrText) {
+        csrText.select();
+        navigator.clipboard.writeText(csrText.value);
+        copyBtn.textContent = '✓ Copied!';
+        setTimeout(() => {
+          copyBtn.textContent = '📋 Copy CSR';
+        }, 2000);
+      }
+    });
+  }
+
+  // Mock Sign CSR
+  const mockSignBtn = document.getElementById('ca-btn-mock-sign');
+  if (mockSignBtn) {
+    mockSignBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch(`${API_BASE}/ca/mock-sign`, { method: "POST" }).then(r => r.json());
+        if (res.status === 'active') {
+          alert("Keystore mock-signed successfully using Sandbox Root CA! local.p12 generated.");
+          renderCAKeystoreStatus();
+        } else {
+          alert(res.detail || "Failed to sign CSR.");
+        }
+      } catch (err) {
+        alert("Error mock-signing CSR.");
+      }
+    });
+  }
+
+  // Upload Certificate
+  const uploadBtn = document.getElementById('ca-btn-upload-cert');
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', async () => {
+      const certText = document.getElementById('ca-upload-text').value.trim();
+      if (!certText) {
+        alert("Please paste the certificate PEM first.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/ca/certificate/upload`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ certificate_pem: certText })
+        }).then(r => r.json());
+
+        if (res.status === 'active') {
+          alert("CA-signed certificate uploaded successfully! Keystore local.p12 updated.");
+          document.getElementById('ca-upload-text').value = '';
+          renderCAKeystoreStatus();
+        } else {
+          alert(res.detail || "Verification failed.");
+        }
+      } catch (err) {
+        alert("Error uploading certificate.");
+      }
+    });
+  }
+}
+
+async function renderCAKeystoreStatus() {
+  try {
+    const status = await fetch(`${API_BASE}/ca/status`).then(r => r.json());
+
+    // Update Status Cards
+    const keyStatusEl = document.getElementById('ca-key-status');
+    const certStatusEl = document.getElementById('ca-cert-status');
+    const keystoreStatusEl = document.getElementById('ca-keystore-status');
+
+    if (status.has_private_key) {
+      keyStatusEl.textContent = 'Generated';
+      keyStatusEl.style.color = 'var(--accent-green)';
+    } else {
+      keyStatusEl.textContent = 'Not Generated';
+      keyStatusEl.style.color = '';
+    }
+
+    if (status.has_certificate) {
+      certStatusEl.textContent = 'Imported';
+      certStatusEl.style.color = 'var(--accent-green)';
+    } else {
+      certStatusEl.textContent = 'Not Imported';
+      certStatusEl.style.color = '';
+    }
+
+    if (status.status === 'active') {
+      keystoreStatusEl.textContent = 'Active';
+      keystoreStatusEl.style.color = 'var(--accent-green)';
+    } else if (status.status === 'pending_ca_signature') {
+      keystoreStatusEl.textContent = 'Pending CA Sign';
+      keystoreStatusEl.style.color = '#f59e0b';
+    } else {
+      keystoreStatusEl.textContent = 'Inactive';
+      keystoreStatusEl.style.color = '';
+    }
+
+    // Toggle panels
+    const csrPanel = document.getElementById('ca-csr-panel');
+    const uploadPanel = document.getElementById('ca-upload-panel');
+    const detailsPanel = document.getElementById('ca-details-panel');
+    const mockSignBtn = document.getElementById('ca-btn-mock-sign');
+
+    if (status.has_csr) {
+      csrPanel.style.display = 'block';
+      document.getElementById('ca-csr-text').value = status.csr_pem;
+      uploadPanel.style.display = 'block';
+    } else {
+      csrPanel.style.display = 'none';
+      uploadPanel.style.display = 'none';
+    }
+
+    if (status.has_csr && !status.has_certificate) {
+      mockSignBtn.style.display = 'inline-block';
+    } else {
+      mockSignBtn.style.display = 'none';
+    }
+
+    if (status.has_certificate) {
+      detailsPanel.style.display = 'flex';
+      document.getElementById('ca-det-cn').textContent = status.subject.common_name || '-';
+      document.getElementById('ca-det-org').textContent = status.subject.organization || '-';
+      document.getElementById('ca-det-country').textContent = status.subject.country || '-';
+      document.getElementById('ca-det-issuer').textContent = status.issuer.common_name || '-';
+      document.getElementById('ca-det-validity').textContent = `${status.validity.not_before} to ${status.validity.not_after}` || '-';
+    } else {
+      detailsPanel.style.display = 'none';
+    }
+
+  } catch (err) {
+    console.error("Failed to render CA status:", err);
   }
 }
 
@@ -2296,75 +2492,70 @@ window.triggerDigitalSignature = function (tenderNo) {
       alert("Please enter a 6-digit OTP code.");
       return;
     }
-    if (otpCode !== "123456") {
-      alert("Invalid OTP code. MOSIP IDA authentication failed.");
-      return;
-    }
-
-    // Hide OTP modal
     idaModal.classList.remove('active');
 
-    // Show digital signing progress modal
-    const signingModal = document.getElementById('signing-modal');
-    const modalProgressFill = document.getElementById('modal-progress-indicator');
-    const signingTitle = document.getElementById('signing-title');
-    const signingDesc = document.getElementById('signing-desc');
+      // Show digital signing progress modal
+      const signingModal = document.getElementById('signing-modal');
+      const modalProgressFill = document.getElementById('modal-progress-indicator');
+      const signingTitle = document.getElementById('signing-title');
+      const signingDesc = document.getElementById('signing-desc');
 
-    signingModal.classList.add('active');
-    modalProgressFill.style.width = '0%';
+      signingModal.classList.add('active');
+      modalProgressFill.style.width = '0%';
+      signingTitle.textContent = "MOSIP IDA Handshake";
+      signingDesc.textContent = "Connecting to identity verification infrastructure...";
 
-    signingTitle.textContent = "MOSIP IDA Handshake";
-    signingDesc.textContent = "Connecting to identity verification infrastructure...";
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 4;
+        modalProgressFill.style.width = `${progress}%`;
 
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 4;
-      modalProgressFill.style.width = `${progress}%`;
+        if (progress === 32) {
+          signingTitle.textContent = "Cryptographic Key Handshake";
+          signingDesc.textContent = "Retrieving authorized official HSM keys from eSignet secure keyspace...";
+        } else if (progress === 64) {
+          signingTitle.textContent = "Signing Document Hash";
+          signingDesc.textContent = "Applying SHA-256 digital signature to tender document specifications...";
+        } else if (progress === 84) {
+          signingTitle.textContent = "Issuing Verifiable Credential";
+          signingDesc.textContent = "Registering W3C verifiable credentials on ledger database...";
+        }
 
-      if (progress === 32) {
-        signingTitle.textContent = "Cryptographic Key Handshake";
-        signingDesc.textContent = "Retrieving authorized official HSM keys from eSignet secure keyspace...";
-      } else if (progress === 64) {
-        signingTitle.textContent = "Signing Document Hash";
-        signingDesc.textContent = "Applying SHA-256 digital signature to tender document specifications...";
-      } else if (progress === 84) {
-        signingTitle.textContent = "Issuing Verifiable Credential";
-        signingDesc.textContent = "Registering W3C verifiable credentials on ledger database...";
-      }
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(async () => {
+            try {
+              const res = await fetch(`${API_BASE}/tenders/${tender.tenderNo}/sign`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  otp: otpCode,
+                  issued_by: (currentUser && currentUser.id) ? currentUser.id : "00000000-0000-0000-0000-000000000000"
+                })
+              });
 
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(async () => {
-          try {
-            // Perform backend signing transaction
-            const res = await fetch(`${API_BASE}/tenders/${tender.tenderNo}/sign`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                otp: otpCode,
-                issued_by: (currentUser && currentUser.id) ? currentUser.id : "00000000-0000-0000-0000-000000000000"
-              })
-            });
+              if (!res.ok) {
+                const errData = await res.json();
+                alert(errData.detail || "Authentication / Signing failed.");
+                signingModal.classList.remove('active');
+                return;
+              }
 
-            if (!res.ok) {
-              const errData = await res.json();
-              alert(errData.detail || "Authentication / Signing failed.");
+              const resData = await res.json();
               signingModal.classList.remove('active');
-              return;
+              alert(`Tender #${tender.tenderNo} has been digitally signed and published!`);
+              
+              // Refresh lists
+              await syncAllData();
+              updateDashboardData();
+            } catch (err) {
+              console.error(err);
+              alert("Error completing tender signature validation.");
+              signingModal.classList.remove('active');
             }
-
-            signingModal.classList.remove('active');
-
-            await syncAllData();
-            updateDashboardData();
-            alert(`Tender #${tender.tenderNo} has been digitally signed and published!`);
-          } catch (e) {
-            signingModal.classList.remove('active');
-            alert("Error: Connection to signing server failed.");
-          }
-        }, 500);
-      }
-    }, 120);
+          }, 800);
+        }
+      }, 100);
   };
 };
 

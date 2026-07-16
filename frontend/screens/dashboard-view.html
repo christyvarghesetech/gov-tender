@@ -15,6 +15,7 @@
             <li><a class="sidebar-link" data-dash-tab="dash-tab-applications">Bid Applications</a></li>
             <li><a class="sidebar-link" data-dash-tab="dash-tab-create">Create Tender</a></li>
             <li><a class="sidebar-link" data-dash-tab="dash-tab-users">User Management</a></li>
+            <li><a class="sidebar-link" data-dash-tab="dash-tab-ca">CA & Key Management</a></li>
             <li><a class="sidebar-link" data-dash-tab="dash-tab-settings">System Settings</a></li>
             <li><a class="sidebar-link" id="dash-logout-btn" style="color: var(--accent-red); margin-top: 2rem;">Logout</a></li>
           </ul>
@@ -298,6 +299,95 @@
                 </div>
               </form>
             </div>
+          </div>
+
+          <!-- SUB-TAB: CA & Key Management -->
+          <div id="dash-tab-ca" class="dash-tab-content" style="display: none;">
+            <div class="dashboard-header-bar">
+              <div class="dashboard-title">
+                <h2>CA & Key Management</h2>
+                <p>Generate cryptographic keys, create Certificate Signing Requests (CSR), and upload CA certificates to back Inji Certify.</p>
+              </div>
+            </div>
+
+            <!-- Keystore Status Card -->
+            <div class="tender-form-card" style="margin-bottom: 2rem;">
+              <h3 class="detail-section-title" style="border:none; margin-top:0;">Keystore Configuration Status</h3>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="dash-stat-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1rem;">
+                  <span class="dash-stat-label">Keystore Status</span>
+                  <div class="dash-stat-val" id="ca-keystore-status" style="font-size: 1.25rem; margin-top: 0.5rem; text-transform: uppercase;">Inactive</div>
+                </div>
+                <div class="dash-stat-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1rem;">
+                  <span class="dash-stat-label">Signing Key</span>
+                  <div class="dash-stat-val" id="ca-key-status" style="font-size: 1.25rem; margin-top: 0.5rem;">Not Generated</div>
+                </div>
+                <div class="dash-stat-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1rem;">
+                  <span class="dash-stat-label">CA Chain Certificate</span>
+                  <div class="dash-stat-val" id="ca-cert-status" style="font-size: 1.25rem; margin-top: 0.5rem;">Not Imported</div>
+                </div>
+              </div>
+
+              <!-- Key details list -->
+              <div id="ca-details-panel" style="display:none; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:var(--text-secondary); margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                <div><strong>Common Name (CN):</strong> <span id="ca-det-cn">-</span></div>
+                <div><strong>Organization:</strong> <span id="ca-det-org">-</span></div>
+                <div><strong>Country:</strong> <span id="ca-det-country">-</span></div>
+                <div><strong>Issuer:</strong> <span id="ca-det-issuer">-</span></div>
+                <div><strong>Validity:</strong> <span id="ca-det-validity">-</span></div>
+              </div>
+
+              <div class="form-actions" style="margin:0; padding:0; display:flex; gap:1rem;">
+                <button type="button" class="btn btn-primary" id="ca-btn-generate-setup">Generate Key & CSR</button>
+                <button type="button" class="btn btn-outline" id="ca-btn-mock-sign" style="display:none;">Mock Sign CSR</button>
+              </div>
+            </div>
+
+            <!-- CSR Panel -->
+            <div class="tender-form-card" id="ca-csr-panel" style="display:none; margin-bottom: 2rem;">
+              <h3 class="detail-section-title" style="border:none; margin-top:0;">Certificate Signing Request (CSR)</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Copy the CSR below and submit it to your Certificate Authority, or use the <strong>Mock Sign</strong> button above to auto-sign it for sandbox testing.
+              </p>
+              <textarea id="ca-csr-text" readonly style="font-family: monospace; font-size: 0.75rem; height: 180px; width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); color: var(--accent-cyan); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; resize: none; margin-bottom: 1rem;"></textarea>
+              <button class="btn btn-outline" id="ca-btn-copy-csr">📋 Copy CSR</button>
+            </div>
+
+            <!-- Certificate Upload Panel -->
+            <div class="tender-form-card" id="ca-upload-panel" style="display:none;">
+              <h3 class="detail-section-title" style="border:none; margin-top:0;">Upload Signed Certificate</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Paste the CA-signed certificate PEM content (starts with <code>-----BEGIN CERTIFICATE-----</code>) to complete the keystore.
+              </p>
+              <textarea id="ca-upload-text" placeholder="-----BEGIN CERTIFICATE-----&#10;...your certificate content...&#10;-----END CERTIFICATE-----" style="font-family: monospace; font-size: 0.75rem; height: 180px; width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; resize: none; margin-bottom: 1.25rem;"></textarea>
+              <button class="btn btn-primary" id="ca-btn-upload-cert">Upload Certificate</button>
+            </div>
+
+            <!-- CSR Generator Form Dialog Modal -->
+            <div id="ca-csr-form-modal" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+              <div style="background: linear-gradient(145deg,#0d1f42,#1a3a6b); border: 1px solid rgba(99,179,237,0.3); border-radius: 16px; padding: 2rem; width: min(450px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                <h3 style="color:#fff; margin-bottom: 1rem;">Generate Key & CSR</h3>
+                <form id="ca-csr-form" style="display:flex; flex-direction:column; gap:1rem;">
+                  <div class="form-group">
+                    <label for="ca-form-cn" style="color:rgba(255,255,255,0.7);">Common Name (CN)</label>
+                    <input type="text" id="ca-form-cn" value="govtender-department-authority" required style="width:100%;">
+                  </div>
+                  <div class="form-group">
+                    <label for="ca-form-org" style="color:rgba(255,255,255,0.7);">Organization (O)</label>
+                    <input type="text" id="ca-form-org" value="Ministry of Infrastructure" required style="width:100%;">
+                  </div>
+                  <div class="form-group">
+                    <label for="ca-form-country" style="color:rgba(255,255,255,0.7);">Country (C)</label>
+                    <input type="text" id="ca-form-country" value="IN" required style="width:100%;" maxlength="2">
+                  </div>
+                  <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top: 1rem;">
+                    <button type="button" class="btn btn-outline" id="ca-csr-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
           </div>
 
         </div>

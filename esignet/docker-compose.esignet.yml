@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  esignet-db:
+    image: postgres:15-alpine
+    container_name: esignet-db
+    ports:
+      - "5455:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - esignet-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: esignet-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - esignet-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mock-identity-system:
+    image: mosipid/mock-identity-system:0.13.0
+    container_name: mock-identity-system
+    ports:
+      - "8082:8082"
+    environment:
+      - active_profile_env=default
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://esignet-db:5432/mosip_mockidentitysystem?currentSchema=mockidentitysystem
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - redis_host=redis
+      - redis_port=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - softhsm_mock_identity_system_security_pin=123456
+      - SOFTHSM_MOCK_IDENTITY_SYSTEM_SECURITY_PIN=123456
+      - mosip_kernel_keymanager_hsm_keystore_type=PKCS12
+      - MOSIP_KERNEL_KEYMANAGER_HSM_KEYSTORE_TYPE=PKCS12
+      - mosip_kernel_keymanager_hsm_config_path=local.p12
+      - MOSIP_KERNEL_KEYMANAGER_HSM_CONFIG_PATH=local.p12
+      - mosip_kernel_keymanager_hsm_keystore_pass=local
+      - MOSIP_KERNEL_KEYMANAGER_HSM_KEYSTORE_PASS=local
+      - spring_jpa_hibernate_ddl_auto=none
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - spring_jpa_generate_ddl=false
+      - SPRING_JPA_GENERATE_DDL=false
+      - mosip_esignet_host=localhost:8088
+      - MOSIP_ESIGNET_HOST=localhost:8088
+    depends_on:
+      esignet-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - esignet-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8082/v1/mock-identity-system/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  esignet:
+    image: mosipid/esignet-with-plugins:1.8.0
+    container_name: esignet
+    ports:
+      - "8088:8088"
+    command: [
+      "java", 
+      "-jar", 
+      "-Dloader.path=/home/mosip/additional_jars/", 
+      "-Dspring.profiles.active=default,local", 
+      "-Dmosip.esignet.database.hostname=esignet-db",
+      "-Dmosip.esignet.database.port=5432",
+      "-Dmosip.esignet.database.name=mosip_esignet",
+      "-Dmosip.esignet.database.username=postgres",
+      "-Dmosip.esignet.database.password=postgres",
+      "-Dspring.data.redis.host=redis",
+      "-Dspring.data.redis.port=6379",
+      "-Dredis.host=redis",
+      "-Dredis.port=6379",
+      "-Dmosip.esignet.mock.domain.url=http://mock-identity-system:8082",
+      "-Dmosip.signup.domain.url=http://localhost:8080/?action=register",
+      "-Dkafka.enabled=false",
+      "esignet-service.jar"
+    ]
+    environment:
+      - active_profile_env=local
+      - plugin_name_env=esignet-mock-plugin.jar
+      - MOSIP_ESIGNET_MOCK_DOMAIN_URL=http://mock-identity-system:8082
+      - MOSIP_ESIGNET_INTEGRATION_KEY_BINDER=MockKeyBindingWrapperService
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://esignet-db:5432/mosip_esignet?currentSchema=esignet
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - redis_host=redis
+      - redis_port=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - softhsm_mock_identity_system_security_pin=123456
+      - SOFTHSM_MOCK_IDENTITY_SYSTEM_SECURITY_PIN=123456
+      - mosip_kernel_keymanager_hsm_keystore_type=PKCS12
+      - MOSIP_KERNEL_KEYMANAGER_HSM_KEYSTORE_TYPE=PKCS12
+      - mosip_kernel_keymanager_hsm_config_path=local.p12
+      - MOSIP_KERNEL_KEYMANAGER_HSM_CONFIG_PATH=local.p12
+      - mosip_kernel_keymanager_hsm_keystore_pass=local
+      - MOSIP_KERNEL_KEYMANAGER_HSM_KEYSTORE_PASS=local
+      - spring_jpa_hibernate_ddl_auto=none
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - spring_jpa_generate_ddl=false
+      - SPRING_JPA_GENERATE_DDL=false
+      - mosip_esignet_host=localhost:8088
+      - MOSIP_ESIGNET_HOST=localhost:8088
+    depends_on:
+      esignet-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock-identity-system:
+        condition: service_healthy
+    volumes:
+      - ./claims_attributes_mapping.json:/home/mosip/claims_attributes_mapping.json
+    networks:
+      - esignet-net
+
+  esignet-ui:
+    image: mosipid/oidc-ui:1.8.0
+    container_name: esignet-ui
+    user: root
+    ports:
+      - "3000:3000"
+    environment:
+      - container_user=mosip
+      - DEFAULT_WELLKNOWN=%5B%7B%22name%22%3A%22OpenID%20Configuration%22%2C%22value%22%3A%22%2F.well-known%2Fopenid-configuration%22%7D%2C%7B%22name%22%3A%22Jwks%20Json%22%2C%22value%22%3A%22%2F.well-known%2Fjwks.json%22%7D%2C%7B%22name%22%3A%22Authorization%20Server%22%2C%22value%22%3A%22%2F.well-known%2Foauth-authorization-server%22%7D%5D
+      - SIGN_IN_WITH_ESIGNET_PLUGIN_URL=https://raw.githubusercontent.com/mosip/artifactory-ref-impl/master/artifacts/src/mosip-plugins/sign-in-with-esignet/sign-in-with-esignet.zip
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      esignet:
+        condition: service_started
+    networks:
+      - esignet-net
+
+networks:
+  esignet-net:
+    name: esignet-net
+    driver: bridge

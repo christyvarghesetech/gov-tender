@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: govtender_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "9605441280"
+      POSTGRES_DB: govtender
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d govtender"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: govtender_api
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    # Load all environment variables from the backend's .env file
+    env_file:
+      - backend/.env
+    # Override the DATABASE_URL to point to the db container instead of localhost
+    environment:
+      - DATABASE_URL=postgresql://postgres:9605441280@db:5432/govtender
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./esignet:/app/esignet
+      - uploads_data:/app/backend/uploads
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+    networks:
+      - default
+      - esignet-net
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  esignet-net:
+    external: true
+

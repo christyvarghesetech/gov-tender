@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git
+.github
+.gitignore
+backend/uploads/*
+!backend/uploads/.gitkeep
+.env

@@ -150,6 +150,10 @@ def sign_tender(tenderNo: str, background_tasks: BackgroundTasks, payload: dict 
     if mosip_ida_client and mosip_ida_client != "your-ida-client-id":
         try:
             import httpx
+            ind_id = current_user.digital_id if hasattr(current_user, 'digital_id') else "official-VID"
+            if ind_id.startswith("uin-"):
+                ind_id = ind_id[4:]
+                
             # Call actual MOSIP IDA Authentication API
             ida_url = f"{mosip_ida_base}/idauth/v1/auth/{mosip_ida_client}"
             res = httpx.post(ida_url, json={
@@ -158,8 +162,8 @@ def sign_tender(tenderNo: str, background_tasks: BackgroundTasks, payload: dict 
                 "requestTime": datetime.datetime.utcnow().isoformat() + "Z",
                 "request": {
                     "otp": otp_code,
-                    "individualId": current_user.digital_id if hasattr(current_user, 'digital_id') else "official-VID",
-                    "individualIdType": "VID"
+                    "individualId": ind_id,
+                    "individualIdType": "UIN"
                 }
             }, timeout=8)
             
@@ -368,7 +372,10 @@ def face_auth_verify(
 
     if mosip_ida_client and mosip_ida_client != "your-ida-client-id":
         try:
-            import httpx
+            ind_id = current_user.digital_id if hasattr(current_user, "digital_id") else "official-VID"
+            if ind_id.startswith("uin-"):
+                ind_id = ind_id[4:]
+                
             ida_url = f"{config.MOSIP_IDA_BASE_URL}/idauth/v1/auth/{mosip_ida_client}"
             res = httpx.post(ida_url, json={
                 "id": "mosip.identity.auth",
@@ -376,8 +383,8 @@ def face_auth_verify(
                 "requestTime": datetime.datetime.utcnow().isoformat() + "Z",
                 "request": {
                     "biometrics": [{"data": face_data, "type": "Face"}],
-                    "individualId": current_user.digital_id if hasattr(current_user, "digital_id") else "official-VID",
-                    "individualIdType": "VID"
+                    "individualId": ind_id,
+                    "individualIdType": "UIN"
                 }
             }, timeout=8)
             res.raise_for_status()

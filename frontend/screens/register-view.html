@@ -1,61 +1,83 @@
 <main id="register-view" class="view-section">
-      <div class="login-card" style="max-width: 500px; margin: 2rem auto;">
-        <div class="login-header">
-          <div class="login-header-logo">GT</div>
-          <h2>Create Vendor Account</h2>
-          <p>Register as an authorized bidder on GovTender</p>
-        </div>
+  <div class="login-card" style="max-width: 520px; margin: 2rem auto;">
 
-        <form id="registration-form">
-          <div class="form-group">
-            <label for="reg-name">Full Name</label>
-            <input type="text" id="reg-name" placeholder="Enter your full legal name" required>
-          </div>
-          <div class="form-row" style="margin-bottom:0;">
-            <div class="form-group">
-              <label for="reg-email">Email Address</label>
-              <input type="email" id="reg-email" placeholder="name@company.com" required>
-            </div>
-            <div class="form-group">
-              <label for="reg-phone">Phone Number</label>
-              <input type="tel" id="reg-phone" placeholder="+91 98765 43210" required>
-            </div>
-          </div>
-          <div class="form-row" style="margin-bottom:0;">
-            <div class="form-group">
-              <label for="reg-company">Company Name</label>
-              <input type="text" id="reg-company" placeholder="e.g. Acme Contracting Ltd" required>
-            </div>
-            <div class="form-group">
-              <label for="reg-type">User Type</label>
-              <select id="reg-type" style="width:100%; background:rgba(17, 24, 39, 0.4); border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; color:white; outline:none; font-family:var(--font-body);" required>
-                <option value="Vendor" style="background:#030712;">Vendor</option>
-                <option value="Contractor" style="background:#030712;">Contractor</option>
-                <option value="Consultant" style="background:#030712;">Consultant</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row" style="margin-bottom:0;">
-            <div class="form-group">
-              <label for="reg-pass">Password</label>
-              <input type="password" id="reg-pass" placeholder="At least 8 characters" required>
-            </div>
-            <div class="form-group">
-              <label for="reg-confirm">Confirm Password</label>
-              <input type="password" id="reg-confirm" placeholder="Repeat password" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label style="display:flex; align-items:flex-start; gap:0.5rem; text-transform:none; font-weight:normal;">
-              <input type="checkbox" id="reg-agree" style="width:auto; margin-top:0.25rem;" required>
-              <span>I accept the <a href="#" style="color:var(--primary-hover);">Terms & Conditions</a> and consent to cryptographic ID validation.</span>
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary btn-full">Create Account</button>
-        </form>
-
-        <div class="login-footer-info">
-          Already have an account? <a onclick="switchView('login-view')" style="cursor:pointer; font-weight:bold;">Login here</a>
-        </div>
+    <!-- Registration Form -->
+    <div id="reg-form-panel">
+      <div class="login-header">
+        <div class="login-header-logo">GT</div>
+        <h2>Create Vendor Account</h2>
+        <p>Register as an authorized bidder on GovTender. You'll receive a MOSIP UIN to log in with eSignet.</p>
       </div>
-    </main>
+
+      <form id="registration-form">
+        <div class="form-group">
+          <label for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" placeholder="Enter your full legal name" required>
+        </div>
+        <div class="form-row" style="margin-bottom:0;">
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" placeholder="name@company.com" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-phone">Phone Number</label>
+            <input type="tel" id="reg-phone" placeholder="+91 98765 43210" required>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:0;">
+          <div class="form-group">
+            <label for="reg-company">Company Name</label>
+            <input type="text" id="reg-company" placeholder="e.g. Acme Contracting Ltd" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-type">User Type</label>
+            <select id="reg-type" style="width:100%; background:rgba(17, 24, 39, 0.4); border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; color:white; outline:none; font-family:var(--font-body);" required>
+              <option value="Vendor" style="background:#030712;">Vendor</option>
+              <option value="Contractor" style="background:#030712;">Contractor</option>
+              <option value="Consultant" style="background:#030712;">Consultant</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex; align-items:flex-start; gap:0.5rem; text-transform:none; font-weight:normal;">
+            <input type="checkbox" id="reg-agree" style="width:auto; margin-top:0.25rem;" required>
+            <span>I accept the <a href="#" style="color:var(--primary-hover);">Terms &amp; Conditions</a> and consent to cryptographic ID validation.</span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="reg-submit-btn">Create Account &amp; Get UIN</button>
+      </form>
+
+      <div class="login-footer-info">
+        Already have an account? <a onclick="switchView('login-view')" style="cursor:pointer; font-weight:bold;">Login here</a>
+      </div>
+    </div>
+
+    <!-- Success Card (hidden until account created) -->
+    <div id="reg-success-panel" style="display:none; text-align:center; padding: 1rem 0;">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+      <h2 style="color: var(--primary); font-family: var(--font-display); margin-bottom: 0.5rem;">Account Created!</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 2rem;">Your GovTender vendor account and MOSIP digital identity have been created successfully.</p>
+
+      <div style="background: rgba(0, 255, 157, 0.05); border: 1px solid var(--primary); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Your MOSIP UIN (save this!)</p>
+        <div id="reg-uin-display" style="font-size: 2rem; font-weight: 800; font-family: var(--font-display); color: var(--primary); letter-spacing: 0.2em; margin-bottom: 0.5rem;">—</div>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Default PIN: <strong style="color: white;">111111</strong></p>
+      </div>
+
+      <div style="background: rgba(255, 200, 0, 0.05); border: 1px solid rgba(255, 200, 0, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: left;">
+        <p style="font-size: 0.85rem; color: #ffd700; margin: 0 0 0.5rem 0; font-weight: 600;">📋 How to log in:</p>
+        <ol style="font-size: 0.825rem; color: var(--text-secondary); margin: 0; padding-left: 1.25rem; line-height: 1.8;">
+          <li>Click <strong style="color:white;">Login / Register</strong> on the home page</li>
+          <li>Click <strong style="color:white;">Authenticate with Digital ID</strong></li>
+          <li>Enter your UIN in the eSignet portal</li>
+          <li>Click <strong style="color:white;">Get OTP</strong> — enter PIN <strong style="color:white;">111111</strong></li>
+        </ol>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="switchView('login-view')">
+        Go to Login →
+      </button>
+    </div>
+
+  </div>
+</main>

@@ -11,21 +11,73 @@ from app.auth import require_role
 
 router = APIRouter()
 
+import random
+import json
+import psycopg2
+
+def generate_uin():
+    """Generate a unique 10-digit UIN not already taken."""
+    return str(random.randint(1000000000, 9999999999))
+
+def insert_mock_identity(uin: str, name: str, email: str, gender: str = "Unknown"):
+    """Insert a new identity into the MOSIP mock identity database."""
+    try:
+        conn = psycopg2.connect(
+            host="esignet-db",
+            port=5432,
+            dbname="mosip_mockidentitysystem",
+            user="postgres",
+            password="postgres"
+        )
+        cur = conn.cursor()
+        identity_json = json.dumps({
+            "individualId": uin,
+            "pin": "111111",
+            "fullName": [{"language": "eng", "value": name}],
+            "email": email,
+            "gender": gender
+        })
+        cur.execute(
+            "INSERT INTO mockidentitysystem.mock_identity (individual_id, identity_json) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+            (uin, identity_json)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Warning: Could not insert mock identity: {e}")
+        return False
+
 @router.post("/register")
 def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
-    # Check if email or digital_id already exists
+    # Check if email already exists
     existing_email = db.query(User).filter(User.email == user_data.email).first()
     if existing_email:
         raise HTTPException(status_code=400, detail="Email address is already registered.")
+    
+    # Generate a UIN for this new vendor and insert into mock identity system
+    uin = generate_uin()
+    insert_mock_identity(
+        uin=uin,
+        name=user_data.name,
+        email=user_data.email,
+        gender="Unknown"
+    )
+    
+    # Use generated UIN as the digital_id (prefix with "uin-" to avoid collision)
+    digital_id = f"uin-{uin}"
+    if user_data.digital_id:
+        digital_id = user_data.digital_id
         
-    existing_did = db.query(User).filter(User.digital_id == user_data.digital_id).first()
+    existing_did = db.query(User).filter(User.digital_id == digital_id).first()
     if existing_did:
         raise HTTPException(status_code=400, detail="Digital ID is already registered.")
         
     new_user = User(
         name=user_data.name,
         email=user_data.email,
-        digital_id=user_data.digital_id,
+        digital_id=digital_id,
         role=user_data.role,
         department=user_data.department,
         created_at=datetime.datetime.utcnow(),
@@ -38,7 +90,7 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         user_id=new_user.id,
         action="USER_REGISTERED",
         module="Authentication",
-        details=f"Vendor user registered: {user_data.name} ({user_data.email})",
+        details=f"Vendor user registered: {user_data.name} ({user_data.email}) | UIN: {uin}",
         timestamp=datetime.datetime.utcnow()
     )
     db.add(log_entry)
@@ -52,7 +104,10 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
         "email": new_user.email,
         "digital_id": new_user.digital_id,
         "role": new_user.role,
-        "department": new_user.department
+        "department": new_user.department,
+        "uin": uin,
+        "pin": "111111",
+        "message": f"Account created! Your eSignet UIN is: {uin}. Use PIN: 111111 to log in."
     }
 
 @router.post("/login")

@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env/
+
+# IDE files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Application secrets & environment configs
+.env
+backend/.env
+**/private_key.pem
+**/public_key.jwk
+
+# Database, logs and generated SQL
+*.db
+*.sqlite3
+**/esignet_logs.txt
+**/init.sql
+
+# Large compiled files / JARs (GitHub limits files to 100MB)
+*.jar
+esignet/*.jar
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Scratch & reference repositories
+scratch_esignet/
+scratch_ida/
+scratch_inji/
+scratch_wallet/
+
+# Private keys and certificate stores
+backend/keys/*.pem
+backend/keys/*.p12
